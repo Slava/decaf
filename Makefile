@@ -1,7 +1,7 @@
 lexer: lexer.ml
 	ocamlc lexer.ml -o lexer
 
-lexer.ml:
+lexer.ml: lexer.mll
 	ocamllex lexer.mll
 
 clean:
