@@ -4,6 +4,9 @@ lexer: lexer.ml
 lexer.ml: lexer.mll
 	ocamllex lexer.mll
 
+tests: lexer
+	./lexer < tests/test.decaf
+
 clean:
 	rm lexer.ml
 	rm lexer.cmo

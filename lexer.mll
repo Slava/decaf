@@ -28,18 +28,18 @@
   let _ =
     List.iter (fun (kwd, tok) -> Hashtbl.add keyword_table kwd tok)
               [
-		("class", CLASS);
-		("interface", INTERFACE);
-		("this", THIS);
-		("extends", EXTENDS);
-		("implements", IMPLEMENTS);
-		("for", FOR);
-		("while", WHILE);
-		("if", IF);
-		("else", ELSE);
-		("return", RETURN);
-		("break", BREAK);
-		("new", NEW)
+                ("class", CLASS);
+                ("interface", INTERFACE);
+                ("this", THIS);
+                ("extends", EXTENDS);
+                ("implements", IMPLEMENTS);
+                ("for", FOR);
+                ("while", WHILE);
+                ("if", IF);
+                ("else", ELSE);
+                ("return", RETURN);
+                ("break", BREAK);
+                ("new", NEW)
               ]
   let builtins = ["NewArray"; "Print"; "ReadInteger"; "ReadLine"]
 }
@@ -50,29 +50,40 @@ let dec_literal = digit+
 let hex_literal = "0" ['X' 'x'] hex_digit+
 
 rule decaf = parse
-		| dec_literal as inum
-		| hex_literal as inum
-				   {
-				     printf "int %s\n" inum;
-				     let num = int_of_string inum in
-				     INT num
-				   }
-		| digit+ "." digit* ( ['e' 'E'] ['+' '-']? digit+ )?
-		  as inum
-		       {
-			 printf "float %s\n" inum;
-			 let num = float_of_string inum in
-			 DOUBLE num
-		       }
-		| '"' [^ '\n' '"']* '"' as str { printf "str %s\n" str; STRING str }
-		| ("true"|"false") as ibool
-					{
-					  printf "bool %s\n" ibool;
-					  BOOL (if ibool = "true" then true else false)
-					}
-		| [' ' '\n' '\t'] { (* ignore whitespace *) decaf lexbuf }
-		| _ { raise Parsing.Parse_error }
-		| eof { raise End_of_file }
+    | dec_literal as inum
+    | hex_literal as inum
+           {
+             printf "int %s\n" inum;
+             let num = int_of_string inum in
+             INT num
+           }
+    | digit+ "." digit* ( ['e' 'E'] ['+' '-']? digit+ )?
+      as inum
+           {
+             printf "float %s\n" inum;
+             let num = float_of_string inum in
+             DOUBLE num
+           }
+    | '"' [^ '\n' '"']* '"' as str { printf "str %s\n" str; STRING str }
+    | ("true"|"false") as ibool
+          {
+            printf "bool %s\n" ibool;
+            BOOL (if ibool = "true" then true else false)
+          }
+
+    | "//" [^ '\n']* { (* ignore comments *) decaf lexbuf }
+
+    (* C-style comments*)
+    | "/*"                    (* start with "/*" *)
+        ( [^ '*']             (* any symbol that is not a star *)
+        | ('*'+ [^ '*' '/'])  (* or is a series of stars not followed by slash *)
+        )*                    (* any numbers of chars in comment's body *)
+        "*/"                  (* finish comment with "*/" *)
+          { decaf lexbuf }
+
+    | [' ' '\n' '\t'] { (* ignore whitespace *) decaf lexbuf }
+    | _ { raise Parsing.Parse_error }
+    | eof { raise End_of_file }
 
 
 {
