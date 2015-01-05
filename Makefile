@@ -4,8 +4,10 @@ lexer: lexer.ml
 lexer.ml: lexer.mll
 	ocamllex lexer.mll
 
-tests: lexer
+tests: lexer tests_files
 	./lexer < tests/test.decaf
+
+tests_files: $(shell find tests -type f)
 
 clean:
 	rm lexer.ml
