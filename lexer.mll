@@ -50,8 +50,8 @@ let dec_literal = digit+
 let hex_literal = "0" ['X' 'x'] hex_digit+
 
 rule decaf = parse
-    | dec_literal as inum
-    | hex_literal as inum
+    (* literals *)
+    | (dec_literal|hex_literal) as inum
            {
              printf "int %s\n" inum;
              let num = int_of_string inum in
@@ -70,6 +70,13 @@ rule decaf = parse
             printf "bool %s\n" ibool;
             BOOL (if ibool = "true" then true else false)
           }
+
+    (* operators *)
+    | ("+"|"-"|"*"|"/"|"%"|"<="|">="|"<"|">"|"=="|"!="|"="|"&&"|"||"|"!"|" |"|","|"."|"["|"]"|"("|")"|"{"|"}")
+      as opr {
+             printf "op %s\n" opr;
+             OP opr
+           }
 
     | "//" [^ '\n']* { (* ignore comments *) decaf lexbuf }
 
