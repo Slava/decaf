@@ -17,9 +17,11 @@
     | BUILTIN of string
     | ID of string
     | OP of string
+    | BOOL of bool
     | INT of int
     | DOUBLE of float
     | CHAR of char
+    | STRING of string
     | NULL
 
   let keyword_table = Hashtbl.create 72
@@ -62,6 +64,12 @@ rule decaf = parse
 			 let num = float_of_string inum in
 			 DOUBLE num
 		       }
+		| '"' [^ '\n' '"']* '"' as str { printf "str %s\n" str; STRING str }
+		| ("true"|"false") as ibool
+					{
+					  printf "bool %s\n" ibool;
+					  BOOL (if ibool = "true" then true else false)
+					}
 		| [' ' '\n' '\t'] { (* ignore whitespace *) decaf lexbuf }
 		| _ { raise Parsing.Parse_error }
 		| eof { raise End_of_file }
