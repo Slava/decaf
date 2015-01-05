@@ -1,0 +1,10 @@
+0
+123 0x13FD
+"some string"
+true false
+// this is a comment
+55555 // this is another comment
+true/* comment
+** multiline
+* is here */false
+
