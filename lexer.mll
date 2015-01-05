@@ -45,7 +45,7 @@
 }
 
 let digit = ['0'-'9']
-let hex_digit = ['0'-'9' 'a'-'z' 'A'-'Z']
+let hex_digit = ['0'-'9' 'a'-'f' 'A'-'F']
 let dec_literal = digit+
 let hex_literal = "0" ['X' 'x'] hex_digit+
 
