@@ -30,7 +30,7 @@ let loop filename () =
   In_channel.close inx
 
 let () =
-  Command.basic ~summary:"Parse and display JSON"
+  Command.basic ~summary:"Parse Decaf programs (WIP)"
     Command.Spec.(empty +> anon ("filename" %: file))
     loop
   |> Command.run
