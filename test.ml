@@ -17,9 +17,10 @@ let parse_with_error lexbuf =
     exit (-1)
 
 let rec parse_and_print lexbuf =
-  let value = parse_with_error lexbuf;
-  let () = List.iter (fun p -> printf "(%s %s)\n" p.(0) p.(1)) value;
-  parse_and_print lexbuf
+  let value = parse_with_error lexbuf in
+    let value = parse_with_error lexbuf in
+      let () = List.iter ~f:(fun p -> printf "(%s %s)\n" (fst p) (snd p)) value in
+        parse_and_print lexbuf
 
 let loop filename () =
   let inx = In_channel.create filename in
