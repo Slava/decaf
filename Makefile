@@ -1,3 +1,6 @@
+all:
+	ocamlbuild -use-menhir -tag thread -use-ocamlfind -quiet -pkg core test.native
+
 lexer: lexer.ml
 	ocamlc lexer.ml -o lexer
 

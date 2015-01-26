@@ -1,29 +1,9 @@
 {
+  open Lexing
   open Printf
+  open Parser
 
-  type token =
-    | CLASS
-    | INTERFACE
-    | THIS
-    | EXTENDS
-    | IMPLEMENTS
-    | FOR
-    | WHILE
-    | IF
-    | ELSE
-    | RETURN
-    | BREAK
-    | NEW
-    | BUILTIN of string
-    | ID of string
-    | OP of string
-    | TYPE of string
-    | BOOL of bool
-    | INT of int
-    | DOUBLE of float
-    | CHAR of char
-    | STRING of string
-    | NULL
+  exception SyntaxError of string
 
   let keyword_table = Hashtbl.create 72
   let _ =
@@ -60,6 +40,7 @@
     | CHAR (c) -> printf "char %c\n" c
     | STRING (str) -> printf "string %s\n" str
     | NULL -> printf "null\n"
+    | EOF -> printf "EOF\n"
 }
 
 let letter = ['a'-'z' 'A'-'Z']
@@ -109,32 +90,12 @@ rule decaf = parse
 
     (* C-style comments*)
     | "/*"                    (* start with "/*" *)
-        ( [^ '*']             (* any symbol that is not a star *)
-        | ('*'+ [^ '*' '/'])  (* or is a series of stars not followed by slash *)
-        )*                    (* any numbers of chars in comment's body *)
-        "*/"                  (* finish comment with "*/" *)
-          { decaf lexbuf }
+      ( [^ '*']               (* any symbol that is not a star *)
+      | ('*'+ [^ '*' '/'])    (* or is a series of stars not followed by slash *)
+      )*                      (* any numbers of chars in comment's body *)
+      "*/"                    (* finish comment with "*/" *)
+        { decaf lexbuf }
 
     | [' ' '\n' '\t'] { (* ignore whitespace *) decaf lexbuf }
-    | _ as c { raise Parsing.Parse_error }
-    | eof { raise End_of_file }
-
-
-{
-  let rec parse lexbuf =
-     let token = decaf lexbuf in
-     mprint token;
-     parse lexbuf
-
-  let main () =
-    let cin =
-      if Array.length Sys.argv > 1
-      then open_in Sys.argv.(1)
-      else stdin
-    in
-    let lexbuf = Lexing.from_channel cin in
-    try parse lexbuf
-    with End_of_file -> ()
-
-  let _ = Printexc.print main ()
-}
+    | _ { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
+    | eof { EOF }
