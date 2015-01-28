@@ -27,6 +27,12 @@
 %token NEW
 %token EOF
 %token ARRAY_DECL
+%token COMMA
+%token PAREN_OPEN
+%token PAREN_CLOSE
+%token BRACE_OPEN
+%token BRACE_CLOSE
+%token SEMICOLON
 
 %left OP
 
@@ -45,7 +51,20 @@ decl:
   ;
 
 variable_decl:
-  | variable { $1 }
+  | variable SEMICOLON { $1 }
+  ;
+
+function_decl:
+  /* Type name (Type a, Type b) stmt_block */
+  | type_ ID PAREN_OPEN formals PAREN_CLOSE stmt_block {}
+  ;
+
+formals:
+  | separated_list(COMMA, variable) { $1 }
+  ;
+
+stmt_block:
+  | BRACE_OPEN list(variable_decl) /*list(stmt)*/ BRACE_CLOSE {}
   ;
 
 variable:

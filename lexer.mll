@@ -24,24 +24,6 @@
               ]
   let builtins = ["NewArray"; "Print"; "ReadInteger"; "ReadLine"]
   let types = ["void"; "int"; "double"; "bool"; "string"]
-
-  let mprint t =
-    match t with
-    | CLASS | INTERFACE | THIS | EXTENDS | IMPLEMENTS | FOR
-    | WHILE | IF | ELSE | RETURN | BREAK | NEW
-                                             -> printf "keyword\n"
-    | BUILTIN (name) -> printf "builtin %s\n" name
-    | ID (id) -> printf "id %s\n" id
-    | OP (opr) -> printf "op %s\n" opr
-    | TYPE (t) -> printf "type %s\n" t
-    | BOOL (b) -> printf "bool %s\n" (if b then "t" else "f")
-    | INT (num) -> printf "int %d\n" num
-    | DOUBLE (num) -> printf "double %f\n" num
-    | CHAR (c) -> printf "char %c\n" c
-    | STRING (str) -> printf "string %s\n" str
-    | NULL -> printf "null\n"
-    | EOF -> printf "EOF\n"
-    | ARRAY_DECL -> printf "array decl op\n"
 }
 
 let letter = ['a'-'z' 'A'-'Z']
@@ -71,13 +53,19 @@ rule decaf = parse
     | "null" { NULL }
 
     (* operators *)
-    | ("+"|"-"|"*"|"/"|"%"|"<="|">="|"<"|">"|"=="|"!="|"="|"&&"|"||"|"!"|";"|","|"."|"["|"]"|"("|")"|"{"|"}")
+    | ("+"|"-"|"*"|"/"|"%"|"<="|">="|"<"|">"|"=="|"!="|"="|"&&"|"||"|"!"|"."|"["|"]")
       as opr {
              OP opr
            }
 
     (* special operator "[]" for array type declarations *)
     | "[]" { ARRAY_DECL }
+    | "," { COMMA }
+    | "(" { PAREN_OPEN }
+    | ")" { PAREN_CLOSE }
+    | "{" { BRACE_OPEN }
+    | "}" { BRACE_CLOSE }
+    | ";" { SEMICOLON }
 
     (* identifiers, keywords, builtins *)
     | letter (letter|digit|'_')* as id
