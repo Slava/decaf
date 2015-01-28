@@ -1,3 +1,7 @@
+%{
+  open Printf
+%}
+
 %token <int> INT
 %token <float> DOUBLE
 %token <string> ID
@@ -27,10 +31,11 @@
 %start <(string * string) list> program
 %%
 
+
 /* list of declarations */
 program:
-  | EOF { [] }
-  | decl program { $1 :: $2 }
+  | EOF { printf "matching EOF!\n"; [] }
+  | decl program { printf "matchin decl\n"; $1 :: $2 }
   ;
 
 decl:

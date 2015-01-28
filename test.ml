@@ -7,6 +7,9 @@ let print_position outx lexbuf =
   fprintf outx "%s:%d:%d" pos.pos_fname
     pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)
 
+let lex lexbuf =
+  Lexer.decaf lexbuf
+
 let parse_with_error lexbuf =
   try Parser.program Lexer.decaf lexbuf with
   | SyntaxError msg ->
@@ -18,9 +21,7 @@ let parse_with_error lexbuf =
 
 let rec parse_and_print lexbuf =
   let value = parse_with_error lexbuf in
-    let value = parse_with_error lexbuf in
-      let () = List.iter ~f:(fun p -> printf "(%s %s)\n" (fst p) (snd p)) value in
-        parse_and_print lexbuf
+    List.iter ~f:(fun p -> printf "(%s %s)\n" (fst p) (snd p)) value
 
 let loop filename () =
   let inx = In_channel.create filename in
