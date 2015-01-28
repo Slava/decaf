@@ -41,6 +41,7 @@
     | STRING (str) -> printf "string %s\n" str
     | NULL -> printf "null\n"
     | EOF -> printf "EOF\n"
+    | ARRAY_DECL -> printf "array decl op\n"
 }
 
 let letter = ['a'-'z' 'A'-'Z']
@@ -70,10 +71,13 @@ rule decaf = parse
     | "null" { NULL }
 
     (* operators *)
-    | ("+"|"-"|"*"|"/"|"%"|"<="|">="|"<"|">"|"=="|"!="|"="|"&&"|"||"|"!"|";"|","|"."|"[]"|"["|"]"|"("|")"|"{"|"}")
+    | ("+"|"-"|"*"|"/"|"%"|"<="|">="|"<"|">"|"=="|"!="|"="|"&&"|"||"|"!"|";"|","|"."|"["|"]"|"("|")"|"{"|"}")
       as opr {
              OP opr
            }
+
+    (* special operator "[]" for array type declarations *)
+    | "[]" { ARRAY_DECL }
 
     (* identifiers, keywords, builtins *)
     | letter (letter|digit|'_')* as id

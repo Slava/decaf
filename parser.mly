@@ -1,5 +1,6 @@
 %{
   open Printf
+  open Types
 %}
 
 %token <int> INT
@@ -25,10 +26,11 @@
 %token BREAK
 %token NEW
 %token EOF
+%token ARRAY_DECL
 
 %left OP
 
-%start <(string * string) list> program
+%start <(Types.decaf_type * string) list> program
 %%
 
 
@@ -47,5 +49,11 @@ variable_decl:
   ;
 
 variable:
-  | TYPE ID { ($1, $2) }
+  | type_ ID { ($1, $2) }
+  ;
+
+type_:
+  | type_ ARRAY_DECL { ArrayType $1 }
+  | TYPE { PrimitiveType $1 }
+  | ID { ComplexType $1 }
   ;

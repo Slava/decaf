@@ -1,6 +1,7 @@
 open Core.Std
 open Lexer
 open Lexing
+open Types
 
 let print_position outx lexbuf =
   let pos = lexbuf.lex_curr_p in
@@ -21,7 +22,7 @@ let parse_with_error lexbuf =
 
 let rec parse_and_print lexbuf =
   let value = parse_with_error lexbuf in
-    List.iter ~f:(fun p -> printf "(%s %s)\n" (fst p) (snd p)) value
+    List.iter ~f:(fun p -> printf "(%s %s)\n" (Types.stringify_type (fst p)) (snd p)) value
 
 let loop filename () =
   let inx = In_channel.create filename in
