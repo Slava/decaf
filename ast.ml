@@ -41,6 +41,11 @@ let stringify_tag t =
 let rec stringify_ast ?(indent=0) (v: ast) =
   (String.make indent ' ')
   ^ (stringify_tag v.tag)
-  ^ (String.concat "\n" (List.map (stringify_ast ~indent:(indent+1)) v.children))
-  ^ "\n"
+  ^ (match v.children with
+     | [] -> ""
+     | hd::tl -> (String.concat
+                    "\n"
+                    (""::List.map
+                           (stringify_ast ~indent:(indent+1))
+                           v.children)))
 ;;
