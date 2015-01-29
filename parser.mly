@@ -1,6 +1,7 @@
 %{
   open Printf
   open Types
+  open Ast
 %}
 
 %token <int> INT
@@ -36,39 +37,62 @@
 
 %left OP
 
-%start <(Types.decaf_type * string) list> program
+%start <Ast.ast> program
 %%
 
 
 /* list of declarations */
 program:
+  | program_
+    {
+      {
+        tag = Program;
+        children = $1;
+      }
+    }
+  ;
+
+program_:
   | EOF { printf "matching EOF!\n"; [] }
-  | decl program { printf "matchin decl\n"; $1 :: $2 }
+  | decl program_ { printf "matchin decl\n"; $1 :: $2 }
   ;
 
 decl:
   | variable_decl { $1 }
+  | function_decl { $1 }
   ;
 
 variable_decl:
-  | variable SEMICOLON { $1 }
+  | variable SEMICOLON
+    {
+      {
+        tag = Variable $1;
+        children = [];
+      }
+    }
   ;
 
 function_decl:
   /* Type name (Type a, Type b) stmt_block */
-  | type_ ID PAREN_OPEN formals PAREN_CLOSE stmt_block {}
+  | type_ name = ID PAREN_OPEN arguments = formals PAREN_CLOSE body = stmt_block
+    {
+      {
+        tag = Function { name; arguments; };
+        children = body;
+      }
+    }
   ;
 
 formals:
-  | separated_list(COMMA, variable) { $1 }
+  | variables = separated_list(COMMA, variable) { variables }
   ;
 
 stmt_block:
-  | BRACE_OPEN list(variable_decl) /*list(stmt)*/ BRACE_CLOSE {}
+  | BRACE_OPEN list(variable_decl) /*list(stmt)*/ BRACE_CLOSE { [] }
   ;
 
 variable:
-  | type_ ID { ($1, $2) }
+  | type_ ID { ($1, $2); }
   ;
 
 type_:
