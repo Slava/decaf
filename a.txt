@@ -1,12 +1,14 @@
-void asdf int ssss
+void asdf; int ssss;
 
+int MyFunction () {}
+void MyFunction (int a, bool b) {}
 
-string xxx
+string xxx;
 
-MyClass variab
+MyClass variab;
 
-MyClass[] arr
-MyClass[][] arr
+MyClass[] arr;
+MyClass[][] arr;
 
-int[] arr
+int[] arr;
 
