@@ -89,7 +89,23 @@ formals:
   ;
 
 stmt_block:
-  | BRACE_OPEN list(variable_decl) /*list(stmt)*/ BRACE_CLOSE { [] }
+  | BRACE_OPEN variable_decls = list(variable_decl) stmts = list(stmt) BRACE_CLOSE
+    {
+      (* deoptionalize statements *)
+      List.append variable_decls (List.filter_map ~f:Fn.id stmts)
+    }
+  ;
+
+stmt:
+  | opt_expr = option(expr) SEMICOLON { opt_expr }
+  ;
+
+expr:
+  | constant { $1 }
+  ;
+
+constant
+  | i = INT { IntConstant i }
   ;
 
 variable:
