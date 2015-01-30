@@ -6,7 +6,7 @@ type ast_node_function =
   {
     name: string;
     arguments: ast_variable list;
-    (* TODO: return value? *)
+    return_type: decaf_type;
   }
 ;;
 
@@ -36,7 +36,8 @@ let stringify_tag t =
   | Variable var -> stringify_var_pair var
   | Function func ->
      stringify_pair ("Function",
-                     func.name ^ ": " ^
+                     (stringify_type func.return_type) ^ ": "
+                     ^ func.name ^ ": " ^
                        (String.concat ", " (List.map stringify_var_pair func.arguments)))
   | Program -> "Program"
 ;;

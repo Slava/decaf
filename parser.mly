@@ -74,10 +74,11 @@ variable_decl:
 
 function_decl:
   /* Type name (Type a, Type b) stmt_block */
-  | type_ name = ID PAREN_OPEN arguments = formals PAREN_CLOSE body = stmt_block
+  | return_type = type_ name = ID PAREN_OPEN arguments = formals
+    PAREN_CLOSE body = stmt_block
     {
       {
-        tag = Function { name; arguments; };
+        tag = Function { name; arguments; return_type; };
         children = body;
       }
     }
