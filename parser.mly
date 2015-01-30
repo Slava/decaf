@@ -53,8 +53,8 @@ program:
   ;
 
 program_:
-  | EOF { printf "matching EOF!\n"; [] }
-  | decl program_ { printf "matchin decl\n"; $1 :: $2 }
+  | EOF { [] }
+  | decl program_ { $1 :: $2 }
   ;
 
 decl:
