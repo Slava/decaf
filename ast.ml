@@ -34,7 +34,10 @@ let stringify_var_pair v =
 let stringify_tag t =
   match t with
   | Variable var -> stringify_var_pair var
-  | Function func -> stringify_pair ("Function", func.name ^ ": TODO args")
+  | Function func ->
+     stringify_pair ("Function",
+                     func.name ^ ": " ^
+                       (String.concat ", " (List.map stringify_var_pair func.arguments)))
   | Program -> "Program"
 ;;
 

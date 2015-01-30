@@ -6,6 +6,6 @@ type decaf_type =
 
 let rec stringify_type t =
   match t with
-  | PrimitiveType (name) -> "<primitive " ^ name ^ ">"
+  | PrimitiveType (name) -> name
   | ArrayType (subt) -> "<array " ^ (stringify_type subt) ^ ">"
   | ComplexType (name) -> "<complex " ^ name ^ ">"
