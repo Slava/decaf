@@ -6,6 +6,7 @@ type decaf_constant =
   | StringConstant of string
   | BoolConstant of bool
   | CharConstant of char
+  | NullConstant
 ;;
 
 let stringify_constant c =
@@ -15,4 +16,5 @@ let stringify_constant c =
   | StringConstant s -> "\"" ^ s ^ "\""
   | BoolConstant b -> string_of_bool b
   | CharConstant c -> "'" ^ (String.of_char c) ^ "'"
+  | NullConstant -> "null"
 ;;

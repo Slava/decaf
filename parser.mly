@@ -107,6 +107,7 @@ constant:
   | d = DOUBLE { DoubleConstant d }
   | c = CHAR { CharConstant c }
   | b = BOOL { BoolConstant b }
+  | NULL { NullConstant }
   ;
 
 variable:

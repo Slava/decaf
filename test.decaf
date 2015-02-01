@@ -6,6 +6,7 @@ int MyFunction () {
   "something something";
   'a';'1';;
   true; false;
+  null;
 }
 void MyFunction (int a, bool b) {}
 
