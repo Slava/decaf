@@ -3,6 +3,9 @@ void asdf; int ssss;
 int MyFunction () {
   int local_var;
   1;;
+  "something something";
+  'a';'1';;
+  true; false;
 }
 void MyFunction (int a, bool b) {}
 

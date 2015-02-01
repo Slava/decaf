@@ -24,6 +24,8 @@
               ]
   let builtins = ["NewArray"; "Print"; "ReadInteger"; "ReadLine"]
   let types = ["void"; "int"; "double"; "bool"; "string"]
+  let string_cut_quotes str =
+    String.sub str 1 (String.length str - 2)
 }
 
 let letter = ['a'-'z' 'A'-'Z']
@@ -45,7 +47,8 @@ rule decaf = parse
              let num = float_of_string inum in
              DOUBLE num
            }
-    | '"' [^ '\n' '"']* '"' as str { STRING str }
+    | '"' [^ '\n' '"']* '"' as str { STRING (string_cut_quotes str) }
+    | '\'' [^ '\''] '\'' as c_str { CHAR (String.get (string_cut_quotes c_str) 0) }
     | ("true"|"false") as ibool
           {
             BOOL (if ibool = "true" then true else false)

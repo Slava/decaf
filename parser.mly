@@ -103,6 +103,10 @@ expr:
 
 constant:
   | i = INT { IntConstant i }
+  | s = STRING { StringConstant s }
+  | d = DOUBLE { DoubleConstant d }
+  | c = CHAR { CharConstant c }
+  | b = BOOL { BoolConstant b }
   ;
 
 variable:

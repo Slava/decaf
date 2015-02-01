@@ -14,5 +14,5 @@ let stringify_constant c =
   | DoubleConstant f -> Float.to_string f
   | StringConstant s -> "\"" ^ s ^ "\""
   | BoolConstant b -> string_of_bool b
-  | CharConstant c -> String.of_char c
+  | CharConstant c -> "'" ^ (String.of_char c) ^ "'"
 ;;
