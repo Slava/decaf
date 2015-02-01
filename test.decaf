@@ -1,6 +1,9 @@
 void asdf; int ssss;
 
-int MyFunction () {}
+int MyFunction () {
+  int local_var;
+  1;;
+}
 void MyFunction (int a, bool b) {}
 
 string xxx;
@@ -11,4 +14,3 @@ MyClass[] arr;
 MyClass[][] arr;
 
 int[] arr;
-

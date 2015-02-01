@@ -50,7 +50,7 @@ and stringify_ast ?(indent=0) (v: ast) =
   (match v with
    | Variable var -> stringify_var_pair var
    | Function func ->
-     "Function"
+     "Function "
      ^ (stringify_type func.return_type)
      ^ ": " ^ func.name ^ ": "
      ^ (String.concat ", " (List.map stringify_var_pair func.arguments)) ^ "\n"
