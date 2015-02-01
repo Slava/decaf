@@ -1,7 +1,20 @@
+bool Assignments () {
+  x=1;
+  x = 1;
+  x.y.z = 3;
+  x[1] = "some string";
+  x[z = xxx] = true;
+}
+
+
 void asdf; int ssss;
 
-int MyFunction () {
+string LocalVariables () {
   int local_var;
+  1;2;3;
+}
+
+int Constants () {
   1;;
   "something something";
   'a';'1';;
@@ -9,6 +22,7 @@ int MyFunction () {
   null;
 }
 void MyFunction (int a, bool b) {}
+
 
 string xxx;
 

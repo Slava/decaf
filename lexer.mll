@@ -26,6 +26,43 @@
   let types = ["void"; "int"; "double"; "bool"; "string"]
   let string_cut_quotes str =
     String.sub str 1 (String.length str - 2)
+
+  let stringify_token t =
+      match t with
+      | INT i -> string_of_int i
+      | DOUBLE f -> string_of_float f
+      | ID str -> "id " ^ str
+      | OP str -> "op " ^ str
+      | STRING str -> "str " ^ str
+      | TYPE str -> "type " ^ str
+      | BUILTIN str -> "builtin " ^ str
+      | CHAR c -> "char " ^ (String.make 1 c)
+      | BOOL b -> "bool " ^ (string_of_bool b)
+      | NULL -> "null"
+      | CLASS -> "class"
+      | INTERFACE -> "interface"
+      | THIS -> "this"
+      | EXTENDS -> "extends"
+      | IMPLEMENTS -> "implements"
+      | FOR -> "for"
+      | WHILE -> "while"
+      | IF -> "if"
+      | ELSE -> "else"
+      | RETURN -> "return"
+      | BREAK -> "break"
+      | NEW -> "new"
+      | EOF -> "eof"
+      | ARRAY_DECL -> "array_decl"
+      | COMMA -> "comma"
+      | PAREN_OPEN -> "paren_open"
+      | PAREN_CLOSE -> "paren_close"
+      | BRACE_OPEN -> "brace_open"
+      | BRACE_CLOSE -> "brace_close"
+      | BRACKET_OPEN -> "bracket_open"
+      | BRACKET_CLOSE -> "bracket_close"
+      | SEMICOLON -> "semicolon"
+      | EQUALS -> "equals"
+      | DOT -> "dot"
 }
 
 let letter = ['a'-'z' 'A'-'Z']
@@ -56,7 +93,7 @@ rule decaf = parse
     | "null" { NULL }
 
     (* operators *)
-    | ("+"|"-"|"*"|"/"|"%"|"<="|">="|"<"|">"|"=="|"!="|"="|"&&"|"||"|"!"|"."|"["|"]")
+    | ("+"|"-"|"*"|"/"|"%"|"<="|">="|"<"|">"|"=="|"!="|"&&"|"||"|"!")
       as opr {
              OP opr
            }
@@ -68,7 +105,11 @@ rule decaf = parse
     | ")" { PAREN_CLOSE }
     | "{" { BRACE_OPEN }
     | "}" { BRACE_CLOSE }
+    | "[" { BRACKET_OPEN }
+    | "]" { BRACKET_CLOSE }
     | ";" { SEMICOLON }
+    | "=" { EQUALS }
+    | "." { DOT }
 
     (* identifiers, keywords, builtins *)
     | letter (letter|digit|'_')* as id

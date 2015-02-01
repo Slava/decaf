@@ -1,5 +1,7 @@
 %{
 open Ast
+open Constants
+open Types
 %}
 
 %token <int> INT
@@ -31,7 +33,11 @@ open Ast
 %token PAREN_CLOSE
 %token BRACE_OPEN
 %token BRACE_CLOSE
+%token BRACKET_OPEN
+%token BRACKET_CLOSE
 %token SEMICOLON
+%token EQUALS
+%token DOT
 
 %left OP
 
@@ -99,6 +105,23 @@ stmt:
 
 expr:
   | constant { Constant $1 }
+  | lvalue EQUALS expr
+    {
+      AssignmentExpression
+        {
+          lvalue = $1;
+          rvalue = $3;
+        }
+    }
+  ;
+
+lvalue:
+  | ID { Symbol($1) }
+  | expr DOT ID { MemberExpression { host = $1; member = Symbol($3); } }
+  | expr BRACKET_OPEN expr BRACKET_CLOSE
+    {
+      ArrayExpression { array = $1; index = $3; }
+    }
   ;
 
 constant:
