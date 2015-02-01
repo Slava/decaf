@@ -1,55 +1,61 @@
 open Types
+open Constants
 
 type ast_variable = (decaf_type * string);;
 
-type ast_node_function =
+type ast =
+  | Variable of ast_variable
+  | Function of ast_function
+  | Program of ast_program
+  | Statement of ast_statement
+
+and ast_function =
   {
     name: string;
     arguments: ast_variable list;
+    body: ast list;
     return_type: decaf_type;
   }
-;;
 
-type ast_node_type =
-  | Variable of ast_variable
-  | Function of ast_node_function
-  | Program
-;;
-
-type ast =
+and ast_program =
   {
-    tag: ast_node_type;
-    children: ast list;
+    body: ast list;
   }
-;;
+
+and ast_statement =
+  | Expression of ast_expression
+
+and ast_expression =
+  | Constant of decaf_constant
 
 let stringify_pair v =
   "<" ^ (fst v) ^ " " ^ (snd v) ^ ">"
-;;
 
 let stringify_var_pair v =
   stringify_pair (stringify_type (fst v), (snd v))
-;;
 
-let stringify_tag t =
-  match t with
-  | Variable var -> stringify_var_pair var
-  | Function func ->
-     stringify_pair ("Function",
-                     (stringify_type func.return_type) ^ ": "
-                     ^ func.name ^ ": " ^
-                       (String.concat ", " (List.map stringify_var_pair func.arguments)))
-  | Program -> "Program"
-;;
+let stringify_expression e =
+  match e with
+  | Constant c -> stringify_constant c
 
-let rec stringify_ast ?(indent=0) (v: ast) =
-  (String.make indent ' ')
-  ^ (stringify_tag v.tag)
-  ^ (match v.children with
-     | [] -> ""
-     | hd::tl -> (String.concat
-                    "\n"
-                    (""::List.map
-                           (stringify_ast ~indent:(indent+1))
-                           v.children)))
+let stringify_statement v =
+  match v with
+  | Expression e -> stringify_expression e
+
+let rec stringify_ast_list (v: ast list) indent =
+  String.concat "\n"
+    (List.map (stringify_ast ~indent:(indent+1)) v)
+and stringify_ast ?(indent=0) (v: ast) =
+  (String.make indent ' ') ^
+  (match v with
+   | Variable var -> stringify_var_pair var
+   | Function func ->
+     "Function"
+     ^ (stringify_type func.return_type)
+     ^ ": " ^ func.name ^ ": "
+     ^ (String.concat ", " (List.map stringify_var_pair func.arguments)) ^ "\n"
+     ^ (stringify_ast_list func.body (indent + 1))
+   | Program p -> "Program\n" ^ (stringify_ast_list p.body (indent + 1))
+   | Statement stmt -> "<" ^ (stringify_statement stmt) ^ ">"
+  )
 ;;

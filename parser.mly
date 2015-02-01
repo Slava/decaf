@@ -1,7 +1,5 @@
 %{
-  open Printf
-  open Types
-  open Ast
+open Ast
 %}
 
 %token <int> INT
@@ -45,10 +43,7 @@
 program:
   | program_
     {
-      {
-        tag = Program;
-        children = $1;
-      }
+      Program { body = $1; }
     }
   ;
 
@@ -65,10 +60,7 @@ decl:
 variable_decl:
   | variable SEMICOLON
     {
-      {
-        tag = Variable $1;
-        children = [];
-      }
+      Variable $1
     }
   ;
 
@@ -77,10 +69,7 @@ function_decl:
   | return_type = type_ name = ID PAREN_OPEN arguments = formals
     PAREN_CLOSE body = stmt_block
     {
-      {
-        tag = Function { name; arguments; return_type; };
-        children = body;
-      }
+        Function { name; arguments; return_type; body; };
     }
   ;
 
@@ -92,19 +81,27 @@ stmt_block:
   | BRACE_OPEN variable_decls = list(variable_decl) stmts = list(stmt) BRACE_CLOSE
     {
       (* deoptionalize statements *)
-      List.append variable_decls (List.filter_map ~f:Fn.id stmts)
+      List.append variable_decls (Core.Std.List.filter_map ~f:(fun o ->
+          match o with
+          | None -> None
+          | Some stmt -> Some (Statement stmt)) stmts)
     }
   ;
 
 stmt:
-  | opt_expr = option(expr) SEMICOLON { opt_expr }
+  | opt_expr = option(expr) SEMICOLON
+      {
+        match opt_expr with
+        | None -> None
+        | Some expr -> Some (Expression expr)
+      }
   ;
 
 expr:
-  | constant { $1 }
+  | constant { Constant $1 }
   ;
 
-constant
+constant:
   | i = INT { IntConstant i }
   ;
 
