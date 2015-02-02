@@ -39,6 +39,8 @@ open Types
 %token EQUALS
 %token DOT
 
+%left DOT
+%right EQUALS
 %left OP
 
 %start <Ast.ast> program
@@ -104,8 +106,8 @@ stmt:
   ;
 
 expr:
-  | constant { Constant $1 }
-  | lvalue EQUALS expr
+  /* implicitly make '=' operator right-associative */
+  | lvalue EQUALS expr_no_assignment
     {
       AssignmentExpression
         {
@@ -113,12 +115,19 @@ expr:
           rvalue = $3;
         }
     }
+  | expr_no_assignment { $1 }
+  ;
+
+(* extra rule to resolve shift-reduce conflict of '=' being associative *)
+expr_no_assignment:
+  | constant { Constant $1 }
+  | lvalue { $1 }
   ;
 
 lvalue:
   | ID { Symbol($1) }
-  | expr DOT ID { MemberExpression { host = $1; member = Symbol($3); } }
-  | expr BRACKET_OPEN expr BRACKET_CLOSE
+  | expr_no_assignment DOT ID { MemberExpression { host = $1; member = Symbol($3); } }
+  | expr_no_assignment BRACKET_OPEN expr BRACKET_CLOSE
     {
       ArrayExpression { array = $1; index = $3; }
     }
