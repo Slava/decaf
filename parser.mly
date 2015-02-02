@@ -134,6 +134,7 @@ expr:
 expr_no_assignment:
   | constant { Constant $1 }
   | lvalue { $1 }
+  | PAREN_OPEN; expr; PAREN_CLOSE; { $2 }
   ;
 
 lvalue:
