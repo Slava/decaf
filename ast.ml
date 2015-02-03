@@ -32,6 +32,7 @@ and ast_expression =
   | MemberExpression of ast_member_expression
   | ArrayExpression of ast_array_expression
   | AssignmentExpression of ast_assignment_expression
+  | ArithmeticExpression of ast_arithmetic_expression
 
 and ast_member_expression =
   {
@@ -50,6 +51,13 @@ and ast_assignment_expression =
     lvalue: ast_expression;
     rvalue: ast_expression;
   }
+
+and ast_arithmetic_expression =
+  | ModuloExpression of (ast_expression * ast_expression)
+  | DivisionExpression of (ast_expression * ast_expression)
+  | MultiplicationExpression of (ast_expression * ast_expression)
+  | AdditionExpression of (ast_expression * ast_expression)
+  | SubstractionExpression of (ast_expression * ast_expression)
 
 let stringify_pair v =
   "<" ^ (fst v) ^ " " ^ (snd v) ^ ">"

@@ -7,7 +7,6 @@ open Types
 %token <int> INT
 %token <float> DOUBLE
 %token <string> ID
-%token <string> OP
 %token <string> STRING
 %token <string> TYPE
 %token <string> BUILTIN
@@ -38,10 +37,27 @@ open Types
 %token SEMICOLON
 %token EQUALS
 %token DOT
+%token LOG_NOT
+%token PLUS
+%token MINUS
+%token ASTERISK
+%token SLASH
+%token PERCENT
+%token CMP_LE
+%token CMP_GE
+%token CMP_EQ
+%token CMP_NEQ
+%token CMP_LT
+%token CMP_GT
+%token LOG_AND
+%token LOG_OR
 
 %left DOT
 %right EQUALS
-%left OP
+%nonassoc CMP_LE CMP_GE CMP_EQ CMP_NEQ CMP_LT CMP_GT LOG_NOT
+%left LOG_AND LOG_OR
+%left MINUS PLUS
+%left ASTERISK SLASH PERCENT
 
 %start <Ast.ast> program
 %%
@@ -128,6 +144,7 @@ expr:
         }
     }
   | expr_no_assignment { $1 }
+  | ae = expr_arithm { ae }
   ;
 
 (* extra rule to resolve shift-reduce conflict of '=' being associative *)
@@ -135,6 +152,29 @@ expr_no_assignment:
   | constant { Constant $1 }
   | lvalue { $1 }
   | PAREN_OPEN; expr; PAREN_CLOSE; { $2 }
+  ;
+
+%inline expr_arithm:
+  | e = expr_arithm_gen(PLUS)
+  | e = expr_arithm_gen(MINUS)
+  | e = expr_arithm_gen(ASTERISK)
+  | e = expr_arithm_gen(SLASH)
+  | e = expr_arithm_gen(PERCENT) { ArithmeticExpression e }
+  ;
+
+%inline expr_arithm_gen(OP):
+  | l = expr; op = OP; r = expr;
+    {
+      (*
+      match op with
+      | PLUS -> AdditionExpression (l, r)
+      | MINUS -> SubstractionExpression (l, r)
+      | ASTERISK -> MultiplicationExpression (l, r)
+      | SLASH -> DivisionExpression (l, r)
+      | PERCENT -> ModuloExpression (l, r)
+      *)
+      AdditionExpression (l, r)
+    }
   ;
 
 lvalue:

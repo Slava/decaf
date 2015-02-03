@@ -32,7 +32,6 @@
       | INT i -> string_of_int i
       | DOUBLE f -> string_of_float f
       | ID str -> "id " ^ str
-      | OP str -> "op " ^ str
       | STRING str -> "str " ^ str
       | TYPE str -> "type " ^ str
       | BUILTIN str -> "builtin " ^ str
@@ -92,12 +91,6 @@ rule decaf = parse
           }
     | "null" { NULL }
 
-    (* operators *)
-    | ("+"|"-"|"*"|"/"|"%"|"<="|">="|"<"|">"|"=="|"!="|"&&"|"||"|"!")
-      as opr {
-             OP opr
-           }
-
     (* special operator "[]" for array type declarations *)
     | "[]" { ARRAY_DECL }
     | "," { COMMA }
@@ -110,6 +103,23 @@ rule decaf = parse
     | ";" { SEMICOLON }
     | "=" { EQUALS }
     | "." { DOT }
+    (* unary operators *)
+    | "!" { LOG_NOT }
+    (* unary and binary *)
+    | "+" { PLUS }
+    | "-" { MINUS }
+    (* binary *)
+    | "*" { ASTERISK }
+    | "/" { SLASH }
+    | "%" { PERCENT }
+    | "<=" { CMP_LE }
+    | ">=" { CMP_GE }
+    | "==" { CMP_EQ }
+    | "!=" { CMP_NEQ }
+    | "<" { CMP_LT }
+    | ">" { CMP_GT }
+    | "&&" { LOG_AND }
+    | "||" { LOG_OR }
 
     (* identifiers, keywords, builtins *)
     | letter (letter|digit|'_')* as id
