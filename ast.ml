@@ -90,8 +90,8 @@ and stringify_ast ?(indent=0) (v: ast) =
    | Function func ->
      "Function "
      ^ (stringify_type func.return_type)
-     ^ ": " ^ func.name ^ ": "
-     ^ (String.concat ", " (List.map stringify_var_pair func.arguments)) ^ "\n"
+     ^ ": " ^ func.name ^ ":"
+     ^ (String.concat "," (List.map (fun s -> " " ^ s) (List.map stringify_var_pair func.arguments))) ^ "\n"
      ^ (stringify_ast_list func.body (indent + 1))
    | Program p -> "Program\n" ^ (stringify_ast_list p.body (indent + 1))
    | Statement stmt -> (stringify_statement stmt)
