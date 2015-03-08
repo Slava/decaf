@@ -78,7 +78,7 @@ let rec stringify_expression e =
 
 let stringify_statement v =
   match v with
-  | Expression e -> "(" ^ (stringify_expression e) ^ ")"
+  | Expression e -> stringify_expression e
 
 let rec stringify_ast_list (v: ast list) indent =
   String.concat "\n"

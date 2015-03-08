@@ -1,6 +1,6 @@
 Program
   Function string: LocalVariables:
     <int local_var>
-    (1)
-    (2)
-    (3)
+    1
+    2
+    3

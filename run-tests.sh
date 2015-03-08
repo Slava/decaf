@@ -12,6 +12,11 @@ for test_file in tests/*.decaf; do
   Normal "> Running a test for "
   Tgreen $test_file "\n"
   ./parser_program.native $test_file > $test_out
+  if [ $? -ne 0 ]; then
+    Tred "Comp Error\n\n"
+    continue
+  fi
+
   $diff ${test_file}.expected $test_out
   if [ $? -eq 0 ]; then
     Tgreen "OK\n"
