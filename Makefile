@@ -2,7 +2,7 @@ all: parser_program lexer_program
 
 parser_program: parser_program.native
 parser_program.native: sources
-	ocamlbuild -use-menhir -tag thread -use-ocamlfind -quiet -pkg core parser_program.native
+	ocamlbuild -use-menhir -tag thread -use-ocamlfind -quiet -pkg core parser_program.native -menhir 'menhir --explain'
 
 lexer_program: lexer_program.native
 lexer_program.native: sources
