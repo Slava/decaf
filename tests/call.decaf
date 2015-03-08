@@ -7,3 +7,12 @@ void f () {
   this.is.another[one()](1, 2);
 }
 
+void builtins () {
+  Print(1);
+  Print(1,2,1+2+3);
+  ReadLine();
+  new SomeClass;
+  NewArray(123, void);
+  NewArray(123+5, int);
+}
+

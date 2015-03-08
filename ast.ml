@@ -36,6 +36,8 @@ and ast_expression =
   | UnArithmeticExpression of ast_unary_arithmetic_expression
   | This
   | CallExpression of ast_call_expression
+  | ArrayAllocExpression of ast_array_alloc_expression
+  | AllocExpression of ast_alloc_expression
 
 and ast_member_expression =
   {
@@ -74,6 +76,17 @@ and ast_call_expression =
     arguments: ast_expression list;
   }
 
+and ast_array_alloc_expression =
+  {
+    type_: decaf_type;
+    size: ast_expression;
+  }
+
+and ast_alloc_expression =
+  {
+    type_: decaf_type;
+  }
+
 let stringify_pair v =
   "<" ^ (fst v) ^ " " ^ (snd v) ^ ">"
 
@@ -100,6 +113,8 @@ let rec stringify_expression e =
           (fun s -> " " ^ (stringify_expression s))
           e.arguments)) ^
     ")"
+  | ArrayAllocExpression e -> "new " ^ (stringify_type e.type_) ^ "[" ^ (stringify_expression e.size) ^ "]"
+  | AllocExpression e -> "new " ^ (stringify_type e.type_)
 
 let stringify_statement v =
   match v with

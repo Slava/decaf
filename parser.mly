@@ -2,6 +2,8 @@
 open Ast
 open Constants
 open Types
+
+exception SyntaxError of string
 %}
 
 %token <int> INT
@@ -9,7 +11,6 @@ open Types
 %token <string> ID
 %token <string> STRING
 %token <string> TYPE
-%token <string> BUILTIN
 %token <char> CHAR
 %token <bool> BOOL
 %token NULL
@@ -25,6 +26,10 @@ open Types
 %token RETURN
 %token BREAK
 %token NEW
+%token NEWARRAY
+%token PRINT
+%token READINTEGER
+%token READLINE
 %token EOF
 %token ARRAY_DECL
 %token COMMA
@@ -122,6 +127,22 @@ stmt:
         | None -> None
         | Some expr -> Some (Expression expr)
       }
+  | p = print_stmt
+      {
+        Some p;
+      }
+  ;
+
+print_stmt:
+  | PRINT; PAREN_OPEN; el = separated_list(COMMA, expr); PAREN_CLOSE; SEMICOLON
+      {
+        match el with
+        | [] -> raise (SyntaxError ("Print must have at least one argument."))
+        | el -> Expression(CallExpression {
+                  callee = Symbol("Print");
+                  arguments = el;
+                })
+      }
   ;
 
 expr:
@@ -137,6 +158,7 @@ expr:
   | expr_simple { $1 }
   | ae = expr_arithm { ae }
   | ae = expr_un_arithm { ae }
+  | e = alloc_expr { e }
   ;
 
 (* extra rule to resolve shift-reduce conflict of operators being associative *)
@@ -192,6 +214,15 @@ lvalue:
     }
   ;
 
+alloc_expr:
+  | NEW t = type_
+    {
+      AllocExpression {
+        type_ = t;
+      }
+    }
+  ;
+
 call:
   /* this doesn't follow decaf's spec precisely */
   /* according to the spec, an expr like a[1]() is not a valid call */
@@ -202,6 +233,27 @@ call:
         arguments = args;
       }
     }
+  | READINTEGER PAREN_OPEN PAREN_CLOSE
+      {
+        CallExpression {
+          callee = Symbol("ReadInteger");
+          arguments = [];
+        }
+      }
+  | READLINE PAREN_OPEN PAREN_CLOSE
+      {
+        CallExpression {
+          callee = Symbol("ReadLine");
+          arguments = [];
+        }
+      }
+  | NEWARRAY PAREN_OPEN size = expr; COMMA; t = type_; PAREN_CLOSE
+      {
+        ArrayAllocExpression {
+          type_ = t;
+          size = size;
+        }
+      }
   ;
 
 actuals:

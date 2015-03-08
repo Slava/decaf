@@ -20,9 +20,12 @@
                 ("else", ELSE);
                 ("return", RETURN);
                 ("break", BREAK);
-                ("new", NEW)
+                ("new", NEW);
+                ("NewArray", NEWARRAY);
+                ("ReadInteger", READINTEGER);
+                ("ReadLine", READLINE);
+                ("Print", PRINT)
               ]
-  let builtins = ["NewArray"; "Print"; "ReadInteger"; "ReadLine"]
   let types = ["void"; "int"; "double"; "bool"; "string"]
   let string_cut_quotes str =
     String.sub str 1 (String.length str - 2)
@@ -34,7 +37,6 @@
       | ID str -> "id " ^ str
       | STRING str -> "str " ^ str
       | TYPE str -> "type " ^ str
-      | BUILTIN str -> "builtin " ^ str
       | CHAR c -> "char " ^ (String.make 1 c)
       | BOOL b -> "bool " ^ (string_of_bool b)
       | NULL -> "null"
@@ -125,9 +127,7 @@ rule decaf = parse
     | letter (letter|digit|'_')* as id
         {
           try Hashtbl.find keyword_table id with
-            Not_found -> if List.mem id builtins
-            then BUILTIN id
-            else if List.mem id types
+            Not_found -> if List.mem id types
             then TYPE id
             else ID id
         }
