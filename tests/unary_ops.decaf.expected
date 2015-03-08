@@ -1,0 +1,6 @@
+Program
+  Function Unary:
+    (= #a (+ 5))
+    (= #b (- a))
+    (= #c (* #a (- #b)))
+
