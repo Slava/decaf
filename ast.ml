@@ -73,8 +73,8 @@ let rec stringify_expression e =
                           ^ ".<" ^ (stringify_expression e.member) ^ ">"
   | ArrayExpression e -> "<" ^ (stringify_expression e.array) ^ ">"
                          ^ "[" ^ (stringify_expression e.index) ^ "]"
-  | AssignmentExpression e -> "(" ^ (stringify_expression e.lvalue) ^ " = " ^ (stringify_expression e.rvalue) ^ ")"
-  | ArithmeticExpression e -> "(" ^ (stringify_expression e.loperand) ^ e.operator ^ (stringify_expression e.roperand) ^ ")"
+  | AssignmentExpression e -> "(= " ^ (stringify_expression e.lvalue) ^ " " ^ (stringify_expression e.rvalue) ^ ")"
+  | ArithmeticExpression e -> "(" ^ e.operator ^ " " ^ (stringify_expression e.loperand) ^ " " ^ (stringify_expression e.roperand) ^ ")"
 
 let stringify_statement v =
   match v with
@@ -94,6 +94,6 @@ and stringify_ast ?(indent=0) (v: ast) =
      ^ (String.concat ", " (List.map stringify_var_pair func.arguments)) ^ "\n"
      ^ (stringify_ast_list func.body (indent + 1))
    | Program p -> "Program\n" ^ (stringify_ast_list p.body (indent + 1))
-   | Statement stmt -> "<" ^ (stringify_statement stmt) ^ ">"
+   | Statement stmt -> (stringify_statement stmt)
   )
 ;;
