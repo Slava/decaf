@@ -1,0 +1,7 @@
+
+
+string LocalVariables () {
+  int local_var;
+  1;2;3;
+}
+

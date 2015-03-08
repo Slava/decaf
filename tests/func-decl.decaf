@@ -1,0 +1,3 @@
+
+void MyFunction (int a, bool b) {}
+

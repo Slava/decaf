@@ -1,0 +1,9 @@
+Program
+  Function bool: Assignments:
+    ((= #x 1))
+    ((= #x 1))
+    ((= <<#x>.<#y>>.<#z> 3))
+    ((= <#x>[1] "some string"))
+    ((= <#x>[(= #z #xxx)] true))
+    (<(= <#x>[1] 2)>.<#member>)
+    ((= #a (= #b #c)))

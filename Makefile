@@ -12,10 +12,7 @@ sources: $(shell find . -maxdepth 1 -name "*.ml" -o -name "*.mll" -o -name "*.ml
 
 test: tests
 tests: parser_program
-	./parser_program.native test.decaf
-
-lexer_tests: lexer_program
-	./lexer_program.native test.decaf
+	./run-tests.sh
 
 clean:
 	rm *.native

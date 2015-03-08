@@ -1,0 +1,9 @@
+int Constants () {
+  1;;
+  "something something";
+  'a';'1';;
+  true; false;
+  null;
+}
+
+
