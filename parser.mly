@@ -44,8 +44,8 @@ open Types
 %token <string> BIN_LOG_OP
 
 %right EQUALS
-%nonassoc BIN_CMP_OP
 %left BIN_LOG_OP
+%nonassoc BIN_CMP_OP
 %left BIN_UN_ADD_OP
 %left BIN_MULT_OP
 
