@@ -123,6 +123,13 @@ stmt_block_:
   ;
 
 stmt:
+  | stmt_no_if { $1 }
+  | if_stmt { $1 }
+  ;
+
+(* extract all of the statments into a separate section *)
+(* to make it simpler to work with if-then-else statements *)
+stmt_no_if:
   | opt_expr = option(expr) SEMICOLON
       {
         match opt_expr with
@@ -130,13 +137,53 @@ stmt:
         | Some expr -> Some (Expression expr)
       }
   | p = print_stmt
-      {
-        Some p;
-      }
+      { Some p; }
   | stmt_block
-      {
-        Some (StatementBlock $1)
-      }
+      { Some (StatementBlock $1) }
+  ;
+
+(* overall the section of if statements is a mess *)
+if_stmt:
+  | if_stmt_matched
+  | if_stmt_unmatched
+    { $1 }
+  ;
+
+if_stmt_matched:
+  | IF PAREN_OPEN cond = expr; PAREN_CLOSE cons = if_stmt_matched; ELSE altern = if_stmt_matched;
+    {
+      Some (
+        IfStatement {
+          condition = cond;
+          consequence = cons;
+          alternative = altern;
+        }
+      )
+    }
+  | stmt_no_if { $1 }
+  ;
+
+if_stmt_unmatched:
+  | IF PAREN_OPEN cond = expr; PAREN_CLOSE cons = stmt;
+    {
+      Some (
+        IfStatement {
+          condition = cond;
+          consequence = cons;
+          alternative = None;
+        }
+      )
+    }
+  | IF PAREN_OPEN cond = expr; PAREN_CLOSE cons = if_stmt_matched; ELSE altern = if_stmt_unmatched;
+    {
+      Some ( 
+        IfStatement {
+          condition = cond;
+          consequence = cons;
+          alternative = altern;
+        }
+      )
+    }
   ;
 
 print_stmt:

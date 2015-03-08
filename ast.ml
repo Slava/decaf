@@ -26,11 +26,19 @@ and ast_program =
 and ast_statement =
   | Expression of ast_expression
   | StatementBlock of ast_statement_block
+  | IfStatement of ast_if_statement
 
 and ast_statement_block =
   {
     declarations: ast_variable list;
     statements: ast_statement list;
+  }
+
+and ast_if_statement =
+  {
+    condition: ast_expression;
+    consequence: ast_statement option;
+    alternative: ast_statement option;
   }
 
 and ast_expression =
