@@ -118,19 +118,19 @@ rule decaf = parse
     | "!=" { BIN_CMP_OP ("!=") }
     | "<" { BIN_CMP_OP ("<") }
     | ">" { BIN_CMP_OP (">") }
-    | "&&" { BIN_CMP_OP ("&&") }
-    | "||" { BIN_CMP_OP ("||") }
+    | "&&" { BIN_LOG_OP ("&&") }
+    | "||" { BIN_LOG_OP ("||") }
 
     (* identifiers, keywords, builtins *)
     | letter (letter|digit|'_')* as id
-           {
-             try Hashtbl.find keyword_table id with
-		 	         Not_found -> if List.mem id builtins
-                            then BUILTIN id
-                            else if List.mem id types
-                            then TYPE id
-                            else ID id
-           }
+        {
+          try Hashtbl.find keyword_table id with
+            Not_found -> if List.mem id builtins
+            then BUILTIN id
+            else if List.mem id types
+            then TYPE id
+            else ID id
+        }
 
     | "//" [^ '\n']* { (* ignore comments *) decaf lexbuf }
 
