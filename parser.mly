@@ -143,6 +143,7 @@ expr:
 expr_simple:
   | constant { Constant $1 }
   | THIS { This }
+  | call { $1 }
   | lvalue { $1 }
   | PAREN_OPEN; expr; PAREN_CLOSE; { $2 }
   ;
@@ -189,6 +190,22 @@ lvalue:
     {
       ArrayExpression { array = $1; index = $3; }
     }
+  ;
+
+call:
+  /* this doesn't follow decaf's spec precisely */
+  /* according to the spec, an expr like a[1]() is not a valid call */
+  | lval = lvalue PAREN_OPEN args = actuals PAREN_CLOSE 
+    {
+      CallExpression {
+        callee = lval;
+        arguments = args;
+      }
+    }
+  ;
+
+actuals:
+  | l = separated_list(COMMA, expr) { l }
   ;
 
 constant:

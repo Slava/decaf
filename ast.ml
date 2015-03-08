@@ -35,6 +35,7 @@ and ast_expression =
   | ArithmeticExpression of ast_arithmetic_expression
   | UnArithmeticExpression of ast_unary_arithmetic_expression
   | This
+  | CallExpression of ast_call_expression
 
 and ast_member_expression =
   {
@@ -67,6 +68,12 @@ and ast_unary_arithmetic_expression =
     operator: string;
   }
 
+and ast_call_expression =
+  {
+    callee: ast_expression;
+    arguments: ast_expression list;
+  }
+
 let stringify_pair v =
   "<" ^ (fst v) ^ " " ^ (snd v) ^ ">"
 
@@ -85,6 +92,14 @@ let rec stringify_expression e =
   | ArithmeticExpression e -> "(" ^ e.operator ^ " " ^ (stringify_expression e.loperand) ^ " " ^ (stringify_expression e.roperand) ^ ")"
   | UnArithmeticExpression e -> "(" ^ e.operator ^ " " ^ (stringify_expression e.operand) ^ ")"
   | This -> "this"
+  | CallExpression e ->
+    "(" ^
+    (stringify_expression e.callee) ^
+    (String.concat ""
+       (List.map
+          (fun s -> " " ^ (stringify_expression s))
+          e.arguments)) ^
+    ")"
 
 let stringify_statement v =
   match v with

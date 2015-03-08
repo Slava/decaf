@@ -1,0 +1,9 @@
+void f () {
+  f();
+  f(1);
+  f(1, 2, 3);
+  f(f(1), f(f(2, 3)));
+  this.something.f();
+  this.is.another[one()](1, 2);
+}
+
