@@ -98,26 +98,21 @@ formals:
   ;
 
 stmt_block:
-  | BRACE_OPEN; statements = stmt_block_; BRACE_CLOSE
+  | BRACE_OPEN; vars = variable_list; statements = list(stmt); BRACE_CLOSE
     {
-      statements
+      (* deoptionalize statements *)
+      let stmts = (Core.Std.List.filter_map ~f:Core.Std.Fn.id statements) in
+      {
+        declarations = vars;
+        statements = stmts;
+      }
     }
   ;
 
-stmt_block_:
+variable_list:
   | /* empty */ { [] }
-  | var = variable; rest = stmt_block_;
-    {
-      (Variable var)::rest
-    }
-  | stmt = stmt; statements = list(stmt)
-    {
-      (* deoptionalize statements *)
-      Core.Std.List.filter_map ~f:(fun o ->
-          match o with
-          | None -> None
-          | Some stmt -> Some (Statement stmt)) (stmt::statements)
-    }
+  | variable SEMICOLON variable_list
+    { $1::$3 }
   ;
 
 stmt:
@@ -130,6 +125,10 @@ stmt:
   | p = print_stmt
       {
         Some p;
+      }
+  | stmt_block
+      {
+        Some (StatementBlock $1)
       }
   ;
 

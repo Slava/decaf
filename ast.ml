@@ -14,7 +14,7 @@ and ast_function =
   {
     name: string;
     arguments: ast_variable list;
-    body: ast list;
+    body: ast_statement_block;
     return_type: decaf_type;
   }
 
@@ -25,6 +25,13 @@ and ast_program =
 
 and ast_statement =
   | Expression of ast_expression
+  | StatementBlock of ast_statement_block
+
+and ast_statement_block =
+  {
+    declarations: ast_variable list;
+    statements: ast_statement list;
+  }
 
 and ast_expression =
   | Constant of decaf_constant
