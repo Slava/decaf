@@ -134,13 +134,13 @@ expr:
           rvalue = $3;
         }
     }
-  | expr_no_assignment { $1 }
+  | expr_simple { $1 }
   | ae = expr_arithm { ae }
   | ae = expr_un_arithm { ae }
   ;
 
-(* extra rule to resolve shift-reduce conflict of '=' being associative *)
-expr_no_assignment:
+(* extra rule to resolve shift-reduce conflict of operators being associative *)
+expr_simple:
   | constant { Constant $1 }
   | lvalue { $1 }
   | PAREN_OPEN; expr; PAREN_CLOSE; { $2 }
@@ -183,8 +183,8 @@ expr_un_arithm:
 
 lvalue:
   | ID { Symbol($1) }
-  | expr_no_assignment DOT ID { MemberExpression { host = $1; member = Symbol($3); } }
-  | expr_no_assignment BRACKET_OPEN expr BRACKET_CLOSE
+  | expr_simple DOT ID { MemberExpression { host = $1; member = Symbol($3); } }
+  | expr_simple BRACKET_OPEN expr BRACKET_CLOSE
     {
       ArrayExpression { array = $1; index = $3; }
     }
