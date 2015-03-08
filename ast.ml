@@ -33,6 +33,7 @@ and ast_expression =
   | ArrayExpression of ast_array_expression
   | AssignmentExpression of ast_assignment_expression
   | ArithmeticExpression of ast_arithmetic_expression
+  | UnArithmeticExpression of ast_unary_arithmetic_expression
 
 and ast_member_expression =
   {
@@ -59,6 +60,12 @@ and ast_arithmetic_expression =
     operator: string;
   }
 
+and ast_unary_arithmetic_expression =
+  {
+    operand: ast_expression;
+    operator: string;
+  }
+
 let stringify_pair v =
   "<" ^ (fst v) ^ " " ^ (snd v) ^ ">"
 
@@ -75,6 +82,7 @@ let rec stringify_expression e =
                          ^ "[" ^ (stringify_expression e.index) ^ "]"
   | AssignmentExpression e -> "(= " ^ (stringify_expression e.lvalue) ^ " " ^ (stringify_expression e.rvalue) ^ ")"
   | ArithmeticExpression e -> "(" ^ e.operator ^ " " ^ (stringify_expression e.loperand) ^ " " ^ (stringify_expression e.roperand) ^ ")"
+  | UnArithmeticExpression e -> "(" ^ e.operator ^ " " ^ (stringify_expression e.operand) ^ ")"
 
 let stringify_statement v =
   match v with

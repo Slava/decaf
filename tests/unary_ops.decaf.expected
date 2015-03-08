@@ -1,6 +1,7 @@
 Program
-  Function Unary:
+  Function int: Unary:
     (= #a (+ 5))
-    (= #b (- a))
+    (= #b (- #a))
     (= #c (* #a (- #b)))
-
+    (! (== #x 5))
+    (== (! #x) 5)

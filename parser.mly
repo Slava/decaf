@@ -48,6 +48,7 @@ open Types
 %nonassoc BIN_CMP_OP
 %left BIN_UN_ADD_OP
 %left BIN_MULT_OP
+%nonassoc UN_LOG_OP
 
 %start <Ast.ast> program
 %%
@@ -135,6 +136,7 @@ expr:
     }
   | expr_no_assignment { $1 }
   | ae = expr_arithm { ae }
+  | ae = expr_un_arithm { ae }
   ;
 
 (* extra rule to resolve shift-reduce conflict of '=' being associative *)
@@ -158,6 +160,22 @@ expr_arithm:
       ArithmeticExpression {
         loperand = l;
         roperand = r;
+        operator = op;
+      }
+    }
+  ;
+
+expr_un_arithm:
+  | e = expr_un_arithm_gen(BIN_UN_ADD_OP)
+  | e = expr_un_arithm_gen(UN_LOG_OP)
+      { e }
+  ;
+
+%inline expr_un_arithm_gen(OP):
+  | op = OP; e = expr;
+    {
+      UnArithmeticExpression {
+        operand = e;
         operator = op;
       }
     }
