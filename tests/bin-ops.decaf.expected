@@ -4,3 +4,14 @@ Program
     (= #y (+ (+ 1 (* 3 5)) 7))
     (= #z (+ 1 (* 3 (+ 5 7))))
     (= #ggg (> (+ #a 11) 9))
+  Function void: Comparisons:
+    (< #a #b)
+    (> #b 222)
+    (>= "1111" 3333)
+    (<= #asdf #fff)
+    (== true false)
+    (!= (+ 2 2) 4)
+  Function void: LogicOps:
+    (|| (&& #a #b) #c)
+    (&& (&& (&& #a #b) #c) (== 2 3))
+    (|| (+ a 3) (< b 4))

@@ -37,17 +37,17 @@ open Types
 %token SEMICOLON
 %token EQUALS
 %token DOT
-%token LOG_NOT
-%token <string> BIN_ADD_OP
+%token <string> UN_LOG_OP
+%token <string> BIN_UN_ADD_OP
 %token <string> BIN_MULT_OP
 %token <string> BIN_CMP_OP
+%token <string> BIN_LOG_OP
 
-%left DOT
 %right EQUALS
-%nonassoc CMP_LE CMP_GE CMP_EQ CMP_NEQ CMP_LT CMP_GT LOG_NOT
-%left BIN_ADD_OP
+%nonassoc BIN_CMP_OP
+%left BIN_LOG_OP
+%left BIN_UN_ADD_OP
 %left BIN_MULT_OP
-%left BIN_CMP_OP
 
 %start <Ast.ast> program
 %%
@@ -145,7 +145,8 @@ expr_no_assignment:
   ;
 
 expr_arithm:
-  | e = expr_arithm_gen(BIN_ADD_OP)
+  | e = expr_arithm_gen(BIN_LOG_OP)
+  | e = expr_arithm_gen(BIN_UN_ADD_OP)
   | e = expr_arithm_gen(BIN_MULT_OP)
   | e = expr_arithm_gen(BIN_CMP_OP)
       { e }

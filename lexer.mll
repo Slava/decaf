@@ -104,10 +104,10 @@ rule decaf = parse
     | "=" { EQUALS }
     | "." { DOT }
     (* unary operators *)
-    | "!" { LOG_NOT }
+    | "!" { UN_LOG_OP ("!") }
     (* unary and binary *)
-    | "+" { BIN_ADD_OP ("+") }
-    | "-" { BIN_ADD_OP ("-") }
+    | "+" { BIN_UN_ADD_OP ("+") }
+    | "-" { BIN_UN_ADD_OP ("-") }
     (* binary *)
     | "*" { BIN_MULT_OP ("*") }
     | "/" { BIN_MULT_OP ("/") }
