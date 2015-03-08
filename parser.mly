@@ -98,21 +98,30 @@ formals:
   ;
 
 stmt_block:
-  | BRACE_OPEN; vars = variable_list; statements = list(stmt); BRACE_CLOSE
+  | BRACE_OPEN; bl = stmt_block_; BRACE_CLOSE
     {
-      (* deoptionalize statements *)
-      let stmts = (Core.Std.List.filter_map ~f:Core.Std.Fn.id statements) in
-      {
-        declarations = vars;
-        statements = stmts;
-      }
+      bl
     }
   ;
 
-variable_list:
-  | /* empty */ { [] }
-  | variable SEMICOLON variable_list
-    { $1::$3 }
+stmt_block_:
+  | /* empty */ { { declarations = []; statements = []; } }
+  | var = variable; rest = stmt_block_;
+    {
+      {
+        declarations = var::rest.declarations;
+        statements = rest.statements;
+      }
+    }
+  | stmt = stmt; statements = list(stmt)
+    {
+      (* deoptionalize statements *)
+      let stmts = (Core.Std.List.filter_map ~f:Core.Std.Fn.id (stmt::statements)) in
+        {
+          declarations = [];
+          statements = stmts;
+        }
+    }
   ;
 
 stmt:
@@ -225,7 +234,7 @@ alloc_expr:
 call:
   /* this doesn't follow decaf's spec precisely */
   /* according to the spec, an expr like a[1]() is not a valid call */
-  | lval = lvalue PAREN_OPEN args = actuals PAREN_CLOSE 
+  | lval = lvalue PAREN_OPEN args = actuals PAREN_CLOSE
     {
       CallExpression {
         callee = lval;
