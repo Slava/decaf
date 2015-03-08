@@ -38,26 +38,16 @@ open Types
 %token EQUALS
 %token DOT
 %token LOG_NOT
-%token PLUS
-%token MINUS
-%token ASTERISK
-%token SLASH
-%token PERCENT
-%token CMP_LE
-%token CMP_GE
-%token CMP_EQ
-%token CMP_NEQ
-%token CMP_LT
-%token CMP_GT
-%token LOG_AND
-%token LOG_OR
+%token <string> BIN_ADD_OP
+%token <string> BIN_MULT_OP
+%token <string> BIN_CMP_OP
 
 %left DOT
 %right EQUALS
 %nonassoc CMP_LE CMP_GE CMP_EQ CMP_NEQ CMP_LT CMP_GT LOG_NOT
-%left LOG_AND LOG_OR
-%left MINUS PLUS
-%left ASTERISK SLASH PERCENT
+%left BIN_ADD_OP
+%left BIN_MULT_OP
+%left BIN_CMP_OP
 
 %start <Ast.ast> program
 %%
@@ -135,7 +125,7 @@ stmt:
 
 expr:
   /* implicitly make '=' operator right-associative */
-  | lvalue EQUALS expr_no_assignment
+  | lvalue EQUALS expr
     {
       AssignmentExpression
         {
@@ -154,26 +144,21 @@ expr_no_assignment:
   | PAREN_OPEN; expr; PAREN_CLOSE; { $2 }
   ;
 
-%inline expr_arithm:
-  | e = expr_arithm_gen(PLUS)
-  | e = expr_arithm_gen(MINUS)
-  | e = expr_arithm_gen(ASTERISK)
-  | e = expr_arithm_gen(SLASH)
-  | e = expr_arithm_gen(PERCENT) { ArithmeticExpression e }
+expr_arithm:
+  | e = expr_arithm_gen(BIN_ADD_OP)
+  | e = expr_arithm_gen(BIN_MULT_OP)
+  | e = expr_arithm_gen(BIN_CMP_OP)
+      { e }
   ;
 
 %inline expr_arithm_gen(OP):
   | l = expr; op = OP; r = expr;
     {
-      (*
-      match op with
-      | PLUS -> AdditionExpression (l, r)
-      | MINUS -> SubstractionExpression (l, r)
-      | ASTERISK -> MultiplicationExpression (l, r)
-      | SLASH -> DivisionExpression (l, r)
-      | PERCENT -> ModuloExpression (l, r)
-      *)
-      AdditionExpression (l, r)
+      ArithmeticExpression {
+        loperand = l;
+        roperand = r;
+        operator = op;
+      }
     }
   ;
 

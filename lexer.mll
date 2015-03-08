@@ -106,20 +106,20 @@ rule decaf = parse
     (* unary operators *)
     | "!" { LOG_NOT }
     (* unary and binary *)
-    | "+" { PLUS }
-    | "-" { MINUS }
+    | "+" { BIN_ADD_OP ("+") }
+    | "-" { BIN_ADD_OP ("-") }
     (* binary *)
-    | "*" { ASTERISK }
-    | "/" { SLASH }
-    | "%" { PERCENT }
-    | "<=" { CMP_LE }
-    | ">=" { CMP_GE }
-    | "==" { CMP_EQ }
-    | "!=" { CMP_NEQ }
-    | "<" { CMP_LT }
-    | ">" { CMP_GT }
-    | "&&" { LOG_AND }
-    | "||" { LOG_OR }
+    | "*" { BIN_MULT_OP ("*") }
+    | "/" { BIN_MULT_OP ("/") }
+    | "%" { BIN_MULT_OP ("%") }
+    | "<=" { BIN_CMP_OP ("<=") }
+    | ">=" { BIN_CMP_OP (">=") }
+    | "==" { BIN_CMP_OP ("==") }
+    | "!=" { BIN_CMP_OP ("!=") }
+    | "<" { BIN_CMP_OP ("<") }
+    | ">" { BIN_CMP_OP (">") }
+    | "&&" { BIN_CMP_OP ("&&") }
+    | "||" { BIN_CMP_OP ("||") }
 
     (* identifiers, keywords, builtins *)
     | letter (letter|digit|'_')* as id

@@ -53,11 +53,11 @@ and ast_assignment_expression =
   }
 
 and ast_arithmetic_expression =
-  | ModuloExpression of (ast_expression * ast_expression)
-  | DivisionExpression of (ast_expression * ast_expression)
-  | MultiplicationExpression of (ast_expression * ast_expression)
-  | AdditionExpression of (ast_expression * ast_expression)
-  | SubstractionExpression of (ast_expression * ast_expression)
+  {
+    loperand: ast_expression;
+    roperand: ast_expression;
+    operator: string;
+  }
 
 let stringify_pair v =
   "<" ^ (fst v) ^ " " ^ (snd v) ^ ">"
@@ -73,11 +73,12 @@ let rec stringify_expression e =
                           ^ ".<" ^ (stringify_expression e.member) ^ ">"
   | ArrayExpression e -> "<" ^ (stringify_expression e.array) ^ ">"
                          ^ "[" ^ (stringify_expression e.index) ^ "]"
-  | AssignmentExpression e -> (stringify_expression e.lvalue) ^ " = " ^ (stringify_expression e.rvalue)
+  | AssignmentExpression e -> "(" ^ (stringify_expression e.lvalue) ^ " = " ^ (stringify_expression e.rvalue) ^ ")"
+  | ArithmeticExpression e -> "(" ^ (stringify_expression e.loperand) ^ e.operator ^ (stringify_expression e.roperand) ^ ")"
 
 let stringify_statement v =
   match v with
-  | Expression e -> stringify_expression e
+  | Expression e -> "(" ^ (stringify_expression e) ^ ")"
 
 let rec stringify_ast_list (v: ast list) indent =
   String.concat "\n"
