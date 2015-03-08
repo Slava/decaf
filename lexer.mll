@@ -142,6 +142,7 @@ rule decaf = parse
       "*/"                    (* finish comment with "*/" *)
         { decaf lexbuf }
 
-    | [' ' '\n' '\t'] { (* ignore whitespace *) decaf lexbuf }
+    | [' ' '\t'] { (* ignore whitespace *) decaf lexbuf }
+    | '\n' { Lexing.new_line lexbuf; decaf lexbuf }
     | _ { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
     | eof { EOF }
