@@ -57,12 +57,13 @@ and stringify_statement ?(indent=0) v =
   | StatementBlock bl ->
     stringify_statement_block bl (indent + 1)
   | IfStatement st ->
+    (make_indent indent) ^
     "if " ^ (stringify_expression st.condition) ^ "\n" ^
     (match st.consequence with
      | Some s -> stringify_statement ~indent:(indent + 1) s
      | None -> "") ^
     (match st.alternative with
-     | Some s -> "else\n" ^ (stringify_statement ~indent:(indent + 1) s)
+     | Some s -> "\n" ^ (make_indent indent) ^ "else\n" ^ (stringify_statement ~indent:(indent + 1) s)
      | None -> "")
 
 and stringify_ast ?(indent=0) (v: ast) =
