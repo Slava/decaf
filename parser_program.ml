@@ -17,7 +17,7 @@ let parse_with_error lexbuf =
 
 let rec parse_and_print lexbuf =
   let ast = parse_with_error lexbuf in
-  printf "%s\n" (Ast.stringify_ast ast)
+  printf "%s\n" (Stringify_ast.stringify_ast ast)
 
 let loop filename () =
   let inx = In_channel.create filename in
