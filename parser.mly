@@ -99,14 +99,12 @@ formals:
 
 stmt_block:
   | BRACE_OPEN; bl = stmt_block_; BRACE_CLOSE
-    {
-      bl
-    }
+    { bl }
   ;
 
 stmt_block_:
   | /* empty */ { { declarations = []; statements = []; } }
-  | var = variable; rest = stmt_block_;
+  | var = variable; SEMICOLON; rest = stmt_block_;
     {
       {
         declarations = var::rest.declarations;

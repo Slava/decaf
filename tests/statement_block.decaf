@@ -1,0 +1,15 @@
+void f () {
+  int var;
+  int a;
+  string c;
+  a = 2;
+  c = "";
+
+  {
+    int d;
+    d = 111;
+  }
+
+  c = "end";
+}
+
