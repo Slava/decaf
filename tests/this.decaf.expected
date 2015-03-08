@@ -1,0 +1,6 @@
+Program
+  Function void: f:
+    this
+    (= <<this>.<#a>>.<#b> 2)
+    (== #x this)
+    (= <this>[2] <<this>[5]>.<#x>)

@@ -142,6 +142,7 @@ expr:
 (* extra rule to resolve shift-reduce conflict of operators being associative *)
 expr_simple:
   | constant { Constant $1 }
+  | THIS { This }
   | lvalue { $1 }
   | PAREN_OPEN; expr; PAREN_CLOSE; { $2 }
   ;
