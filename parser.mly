@@ -123,6 +123,12 @@ stmt_block_:
   ;
 
 stmt:
+  | s = if_matched
+  | s = if_unmatched
+      { s }
+  ;
+
+stmt_no_if:
   | opt_expr = option(expr) SEMICOLON
       {
         match opt_expr with
@@ -130,13 +136,46 @@ stmt:
         | Some expr -> Some (Expression expr)
       }
   | p = print_stmt
-      {
-        Some p;
-      }
+      { Some p; }
   | stmt_block
-      {
-        Some (StatementBlock $1)
-      }
+      { Some (StatementBlock $1) }
+  ;
+
+if_matched:
+  | stmt_no_if { $1 }
+  | IF PAREN_OPEN cond = expr; PAREN_CLOSE cons = if_matched; ELSE altern = if_matched;
+    {
+      Some (
+        IfStatement {
+          condition = cond;
+          consequence = cons;
+          alternative = altern;
+        }
+      )
+    }
+  ;
+
+if_unmatched:
+  | IF PAREN_OPEN cond = expr; PAREN_CLOSE cons = stmt;
+    {
+      Some (
+        IfStatement {
+          condition = cond;
+          consequence = cons;
+          alternative = None;
+        }
+      )
+    }
+  | IF PAREN_OPEN cond = expr; PAREN_CLOSE cons = if_matched; ELSE altern = if_unmatched;
+    {
+      Some (
+        IfStatement {
+          condition = cond;
+          consequence = cons;
+          alternative = altern;
+        }
+      )
+    }
   ;
 
 print_stmt:

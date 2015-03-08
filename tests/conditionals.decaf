@@ -1,0 +1,36 @@
+void f () {
+  if (x == 3 && y > 1)
+    doThis();
+  if (!! isEmpty)
+    ;
+
+  if (true)
+    a();
+  else
+    b();
+
+  if (true)
+    a();
+  else if (false)
+    b();
+  else
+    c();
+
+  if (1)
+    if (2)
+      a();
+    else
+      b();
+
+  if (1)
+    if (2)
+      a();
+    else
+      b();
+  else
+    if (3)
+      c();
+    else
+      d();
+}
+
