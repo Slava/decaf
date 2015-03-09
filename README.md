@@ -10,8 +10,8 @@ The language spec can be found here: <http://web.stanford.edu/class/archive/cs/c
 
 ## How much is done?
 
-- [ ] Lexer
-- [ ] Parser
+- [x] Lexer
+- [x] Parser
 - [ ] Semantic analysis
 - [ ] Code generation
 - [ ] Runtime?
