@@ -104,8 +104,8 @@ class_decl:
         name;
         super = ext;
         interfaces = implmnts;
-        methods = fields.methods;
-        properties = fields.properties;
+        methods = (fst fields);
+        properties = (snd fields);
       }
     }
   ;
@@ -120,27 +120,11 @@ class_decl_implements:
   ;
 
 class_fields:
-  | /* empty */ { { name = ""; super = None; interfaces = []; methods = []; properties = []; } }
+  | /* empty */ { ([], []) }
   | variable_decl class_fields
-    {
-      {
-        name = "";
-        super = None;
-        interfaces = [];
-        methods = $2.methods;
-        properties = $1::$2.properties;
-      }
-    }
+    { ((fst $2), $1::(snd $2)) }
   | function_decl class_fields
-    {
-      {
-        name = "";
-        super = None;
-        interfaces = [];
-        methods = $1::$2.methods;
-        properties = $2.properties;
-      }
-    }
+    { ($1::(fst $2), (snd $2)) }
   ;
 
 formals:
