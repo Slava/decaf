@@ -55,6 +55,9 @@ exception SyntaxError of string
 %left BIN_MULT_OP
 %nonassoc UN_LOG_OP
 
+%nonassoc NOELSE
+%nonassoc ELSE
+
 %start <Ast.ast> program
 %%
 
@@ -123,12 +126,6 @@ stmt_block_:
   ;
 
 stmt:
-  | s = if_matched
-  | s = if_unmatched
-      { s }
-  ;
-
-stmt_no_if:
   | opt_expr = option(expr) SEMICOLON
       {
         match opt_expr with
@@ -139,42 +136,50 @@ stmt_no_if:
       { Some p; }
   | stmt_block
       { Some (StatementBlock $1) }
+  | if_stmt
+      { Some (IfStatement $1) }
+  | while_stmt
+      { Some (WhileStatement $1) }
+  | for_stmt
+      { Some (ForStatement $1) }
   ;
 
-if_matched:
-  | stmt_no_if { $1 }
-  | IF PAREN_OPEN cond = expr; PAREN_CLOSE cons = if_matched; ELSE altern = if_matched;
+if_stmt:
+  | IF PAREN_OPEN cond = expr; PAREN_CLOSE cons = stmt; altern = opt_else_tail;
     {
-      Some (
-        IfStatement {
-          condition = cond;
-          consequence = cons;
-          alternative = altern;
-        }
-      )
+      {
+        condition = cond;
+        consequence = cons;
+        alternative = altern;
+      }
     }
   ;
 
-if_unmatched:
-  | IF PAREN_OPEN cond = expr; PAREN_CLOSE cons = stmt;
+opt_else_tail:
+  | /* empty */ %prec NOELSE
+    { None }
+  | ELSE stmt;
+    { $2 }
+  ;
+
+while_stmt:
+  | WHILE; PAREN_OPEN; cond = expr; PAREN_CLOSE; body = stmt;
     {
-      Some (
-        IfStatement {
-          condition = cond;
-          consequence = cons;
-          alternative = None;
-        }
-      )
+      {
+        condition = cond;
+        body = body;
+      }
     }
-  | IF PAREN_OPEN cond = expr; PAREN_CLOSE cons = if_matched; ELSE altern = if_unmatched;
+  ;
+
+for_stmt:
+  | FOR; PAREN_OPEN;
+      initialization = option(expr); SEMICOLON;
+      condition = expr; SEMICOLON;
+      afterthought = option(expr); PAREN_CLOSE;
+    body = stmt;
     {
-      Some (
-        IfStatement {
-          condition = cond;
-          consequence = cons;
-          alternative = altern;
-        }
-      )
+      { initialization; condition; afterthought; body; }
     }
   ;
 

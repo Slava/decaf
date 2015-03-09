@@ -59,12 +59,33 @@ and stringify_statement ?(indent=0) v =
   | IfStatement st ->
     (make_indent indent) ^
     "if " ^ (stringify_expression st.condition) ^ "\n" ^
-    (match st.consequence with
-     | Some s -> stringify_statement ~indent:(indent + 1) s
-     | None -> "") ^
+    (stringify_opt_statement (indent + 1) st.consequence) ^
     (match st.alternative with
-     | Some s -> "\n" ^ (make_indent indent) ^ "else\n" ^ (stringify_statement ~indent:(indent + 1) s)
+     | Some s -> "\n" ^
+                 (make_indent indent) ^
+                 "else\n" ^
+                 (stringify_statement ~indent:(indent + 1) s)
      | None -> "")
+  | WhileStatement st ->
+    (make_indent indent) ^
+    "while " ^ (stringify_expression st.condition) ^ "\n" ^
+    (stringify_opt_statement (indent + 1) st.body)
+  | ForStatement st ->
+    (make_indent indent) ^
+    "for |" ^ (stringify_opt_expression st.initialization) ^
+    "|" ^ (stringify_expression st.condition) ^
+    "|" ^ (stringify_opt_expression st.afterthought) ^ "|\n" ^
+    (stringify_opt_statement (indent + 1) st.body)
+
+and stringify_opt_statement indent st =
+  (match st with
+   | Some s -> stringify_statement ~indent:indent s
+   | None -> "")
+
+and stringify_opt_expression e =
+  match e with
+  | Some e -> stringify_expression e
+  | None -> ""
 
 and stringify_ast ?(indent=0) (v: ast) =
   (make_indent indent) ^
