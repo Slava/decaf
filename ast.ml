@@ -30,6 +30,7 @@ and ast_statement =
   | WhileStatement of ast_while_statement
   | ForStatement of ast_for_statement
   | ReturnStatement of ast_return_statement
+  | BreakStatement
 
 and ast_statement_block =
   {

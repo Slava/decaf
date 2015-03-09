@@ -79,6 +79,8 @@ and stringify_statement ?(indent=0) v =
   | ReturnStatement st ->
     (make_indent indent) ^
     "return " ^ (stringify_opt_expression st.value)
+  | BreakStatement ->
+    (make_indent indent) ^ "break"
 
 and stringify_opt_statement indent st =
   (match st with

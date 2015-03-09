@@ -144,6 +144,8 @@ stmt:
       { Some (ForStatement $1) }
   | return_stmt
       { Some (ReturnStatement $1) }
+  | break_stmt
+      { Some BreakStatement }
   ;
 
 if_stmt:
@@ -192,6 +194,10 @@ return_stmt:
     }
   ;
 
+break_stmt:
+  | BREAK; SEMICOLON;
+    { }
+  ;
 print_stmt:
   | PRINT; PAREN_OPEN; el = separated_list(COMMA, expr); PAREN_CLOSE; SEMICOLON
       {
