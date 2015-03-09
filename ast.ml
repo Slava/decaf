@@ -29,6 +29,7 @@ and ast_statement =
   | IfStatement of ast_if_statement
   | WhileStatement of ast_while_statement
   | ForStatement of ast_for_statement
+  | ReturnStatement of ast_return_statement
 
 and ast_statement_block =
   {
@@ -55,6 +56,11 @@ and ast_for_statement =
     condition: ast_expression;
     afterthought: ast_expression option;
     body: ast_statement option;
+  }
+
+and ast_return_statement =
+  {
+    value: ast_expression option;
   }
 
 and ast_expression =

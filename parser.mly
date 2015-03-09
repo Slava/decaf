@@ -142,6 +142,8 @@ stmt:
       { Some (WhileStatement $1) }
   | for_stmt
       { Some (ForStatement $1) }
+  | return_stmt
+      { Some (ReturnStatement $1) }
   ;
 
 if_stmt:
@@ -180,6 +182,13 @@ for_stmt:
     body = stmt;
     {
       { initialization; condition; afterthought; body; }
+    }
+  ;
+
+return_stmt:
+  | RETURN; opt_expr = option(expr); SEMICOLON;
+    {
+      { value = opt_expr; }
     }
   ;
 
