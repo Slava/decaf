@@ -54,20 +54,20 @@ and stringify_statement (v: ast_statement) =
     indent_lines (stringify_statement_block bl)
   | IfStatement st ->
     "if " ^ (stringify_expression st.condition) ^ "\n" ^
-    (indent_lines (stringify_opt_statement st.consequence)) ^
+    indent_lines (stringify_opt_statement st.consequence) ^
     (match st.alternative with
      | Some alt ->
        "\nelse\n" ^
-       (indent_lines (stringify_statement alt))
+       indent_lines (stringify_statement alt)
      | None -> "")
   | WhileStatement st ->
     "while " ^ (stringify_expression st.condition) ^ "\n" ^
-    (indent_lines (stringify_opt_statement st.body))
+    indent_lines (stringify_opt_statement st.body)
   | ForStatement st ->
     "for |" ^ (stringify_opt_expression st.initialization) ^
     "|" ^ (stringify_expression st.condition) ^
     "|" ^ (stringify_opt_expression st.afterthought) ^ "|\n" ^
-    (indent_lines (stringify_opt_statement st.body))
+    indent_lines (stringify_opt_statement st.body)
   | ReturnStatement st ->
     "return " ^ (stringify_opt_expression st.value)
   | BreakStatement ->
@@ -83,13 +83,23 @@ and stringify_opt_expression e =
   | Some e -> stringify_expression e
   | None -> ""
 
+and stringify_formals fs =
+  fs
+  |> List.map ~f:(fun s -> " " ^ stringify_var_pair s)
+  |> String.concat ~sep:","
+
 and stringify_function (func: ast_function) =
   "Function " ^
-  (stringify_type func.return_type) ^
+  stringify_type func.return_type ^
   ": " ^ func.name ^ ":" ^
-  (String.concat ~sep:"," (List.map ~f:(fun s -> " " ^ s) (List.map ~f:stringify_var_pair func.arguments))) ^
+  stringify_formals func.arguments ^
   "\n" ^
-  (indent_lines (stringify_statement_block func.body))
+  indent_lines (stringify_statement_block func.body)
+
+and stringify_prototype (p: ast_prototype) =
+  stringify_type p.return_type ^
+  ": " ^ p.name ^ ":" ^
+  stringify_formals p.arguments
 
 and stringify_ast (v: ast) =
   (match v with
@@ -100,10 +110,13 @@ and stringify_ast (v: ast) =
       | Some s -> ": " ^ s
       | None -> "") ^
      " [" ^ (String.concat ~sep:" " c.interfaces) ^ "]" ^ "\n" ^
-     (indent_lines (stringify_list_helper stringify_var_pair c.properties)) ^ "\n" ^
-     (indent_lines (stringify_list_helper stringify_function c.methods))
+     indent_lines (stringify_list_helper stringify_var_pair c.properties) ^ "\n" ^
+     indent_lines (stringify_list_helper stringify_function c.methods)
+   | Interface i ->
+     "Interface " ^ i.name ^ "\n" ^
+     indent_lines (stringify_list_helper stringify_prototype i.properties)
    | Function func -> (stringify_function func)
-   | Program p -> "Program\n" ^ (indent_lines (stringify_ast_list p.body))
+   | Program p -> "Program\n" ^ indent_lines (stringify_ast_list p.body)
    | Statement stmt -> (stringify_statement stmt)
   )
 

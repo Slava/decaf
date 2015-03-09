@@ -1,0 +1,4 @@
+Program
+  Interface Runnable
+    void: run:
+    void: stop: <int x>

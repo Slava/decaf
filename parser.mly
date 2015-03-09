@@ -79,6 +79,7 @@ decl:
   | variable_decl { Variable $1 }
   | function_decl { Function $1 }
   | class_decl { Class $1 }
+  | interface_decl { Interface $1 }
   ;
 
 variable_decl:
@@ -125,6 +126,23 @@ class_fields:
     { ((fst $2), $1::(snd $2)) }
   | function_decl class_fields
     { ($1::(fst $2), (snd $2)) }
+  ;
+
+interface_decl:
+  | INTERFACE; name = ID; BRACE_OPEN; props = list(prototype); BRACE_CLOSE;
+    {
+      {
+        name;
+        properties = props;
+      }
+    }
+  ;
+
+prototype:
+  | return_type = type_; name = ID; PAREN_OPEN; arguments = formals; PAREN_CLOSE; SEMICOLON;
+    {
+      { return_type; name; arguments; }
+    }
   ;
 
 formals:

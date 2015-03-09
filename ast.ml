@@ -8,6 +8,7 @@ type ast =
   | Variable of ast_variable
   | Function of ast_function
   | Class of ast_class
+  | Interface of ast_interface
   | Program of ast_program
   | Statement of ast_statement
 
@@ -26,6 +27,19 @@ and ast_class =
     interfaces: string list;
     methods: ast_function list;
     properties: ast_variable list;
+  }
+
+and ast_interface =
+  {
+    name: string;
+    properties: ast_prototype list;
+  }
+
+and ast_prototype =
+  {
+    return_type: decaf_type;
+    name: string;
+    arguments: ast_variable list;
   }
 
 and ast_program =
