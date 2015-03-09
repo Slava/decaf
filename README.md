@@ -8,6 +8,14 @@ and it is on a very early stage of development, the best description is
 
 The language spec can be found here: <http://web.stanford.edu/class/archive/cs/cs143/cs143.1128/handouts/030%20Decaf%20Specification.pdf>
 
+## How much is done?
+
+- [ ] Lexer
+- [ ] Parser
+- [ ] Semantic analysis
+- [ ] Code generation
+- [ ] Runtime?
+
 
 ## Build
 
