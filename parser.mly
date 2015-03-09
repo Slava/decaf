@@ -76,15 +76,14 @@ program_:
   ;
 
 decl:
-  | variable_decl { $1 }
-  | function_decl { $1 }
+  | variable_decl { Variable $1 }
+  | function_decl { Function $1 }
+  | class_decl { Class $1 }
   ;
 
 variable_decl:
   | variable SEMICOLON
-    {
-      Variable $1
-    }
+    { $1 }
   ;
 
 function_decl:
@@ -92,7 +91,55 @@ function_decl:
   | return_type = type_ name = ID PAREN_OPEN arguments = formals
     PAREN_CLOSE body = stmt_block
     {
-        Function { name; arguments; return_type; body; };
+      { name; arguments; return_type; body; }
+    }
+  ;
+
+class_decl:
+  | CLASS; name = ID;
+    ext = option(class_decl_extends); implmnts = class_decl_implements;
+    BRACE_OPEN; fields = class_fields; BRACE_CLOSE;
+    {
+      {
+        name;
+        super = ext;
+        interfaces = implmnts;
+        methods = fields.methods;
+        properties = fields.properties;
+      }
+    }
+  ;
+
+class_decl_extends:
+  | EXTENDS ID { $2 }
+  ;
+
+class_decl_implements:
+  | /* empty */ { [] }
+  | IMPLEMENTS l = separated_list(COMMA, ID) { l }
+  ;
+
+class_fields:
+  | /* empty */ { { name = ""; super = None; interfaces = []; methods = []; properties = []; } }
+  | variable_decl class_fields
+    {
+      {
+        name = "";
+        super = None;
+        interfaces = [];
+        methods = $2.methods;
+        properties = $1::$2.properties;
+      }
+    }
+  | function_decl class_fields
+    {
+      {
+        name = "";
+        super = None;
+        interfaces = [];
+        methods = $1::$2.methods;
+        properties = $2.properties;
+      }
     }
   ;
 

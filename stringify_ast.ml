@@ -1,6 +1,11 @@
 open Types
 open Constants
 open Ast
+open Core.Std
+
+let stringify_list_helper (f: 'a -> string) (lst: 'a list): string =
+  String.concat ~sep:"\n"
+    (List.map ~f:f lst)
 
 let stringify_pair v =
   "<" ^ (fst v) ^ " " ^ (snd v) ^ ">"
@@ -23,68 +28,54 @@ let rec stringify_expression e =
   | CallExpression e ->
     "(" ^
     (stringify_expression e.callee) ^
-    (String.concat ""
+    (String.concat ~sep:""
        (List.map
-          (fun s -> " " ^ (stringify_expression s))
+          ~f:(fun s -> " " ^ (stringify_expression s))
           e.arguments)) ^
     ")"
   | ArrayAllocExpression e -> "new " ^ (stringify_type e.type_) ^ "[" ^ (stringify_expression e.size) ^ "]"
   | AllocExpression e -> "new " ^ (stringify_type e.type_)
 
-let rec stringify_ast_list (v: ast list) indent =
-  String.concat "\n"
-    (List.map (stringify_ast ~indent:indent) v)
+let rec stringify_ast_list (v: ast list) =
+  String.concat ~sep:"\n"
+    (List.map ~f:stringify_ast v)
 
-and stringify_statement_block block indent =
-  (
-    match block.declarations with
-    | [] -> ""
-    | decls ->
-      (String.concat
-         "\n"
-         (List.map
-            (fun d -> (make_indent indent) ^ (stringify_var_pair d)) decls)
-      ) ^ "\n"
-  ) ^ (
-    String.concat
-      "\n"
-      (List.map (fun stmt -> (stringify_statement ~indent stmt)) block.statements)
-  )
+and stringify_statement_block block =
+  (match block.declarations with
+   | [] -> ""
+   | decls ->
+     (stringify_list_helper stringify_var_pair decls) ^ "\n") ^
+  (stringify_list_helper stringify_statement block.statements)
 
-and stringify_statement ?(indent=0) v =
+and stringify_statement (v: ast_statement) =
   match v with
-  | Expression e -> (make_indent indent) ^ (stringify_expression e)
+  | Expression e -> stringify_expression e
   | StatementBlock bl ->
-    stringify_statement_block bl (indent + 1)
+    indent_lines (stringify_statement_block bl)
   | IfStatement st ->
-    (make_indent indent) ^
     "if " ^ (stringify_expression st.condition) ^ "\n" ^
-    (stringify_opt_statement (indent + 1) st.consequence) ^
+    (indent_lines (stringify_opt_statement st.consequence)) ^
     (match st.alternative with
-     | Some s -> "\n" ^
-                 (make_indent indent) ^
-                 "else\n" ^
-                 (stringify_statement ~indent:(indent + 1) s)
+     | Some alt ->
+       "\nelse\n" ^
+       (indent_lines (stringify_statement alt))
      | None -> "")
   | WhileStatement st ->
-    (make_indent indent) ^
     "while " ^ (stringify_expression st.condition) ^ "\n" ^
-    (stringify_opt_statement (indent + 1) st.body)
+    (indent_lines (stringify_opt_statement st.body))
   | ForStatement st ->
-    (make_indent indent) ^
     "for |" ^ (stringify_opt_expression st.initialization) ^
     "|" ^ (stringify_expression st.condition) ^
     "|" ^ (stringify_opt_expression st.afterthought) ^ "|\n" ^
-    (stringify_opt_statement (indent + 1) st.body)
+    (indent_lines (stringify_opt_statement st.body))
   | ReturnStatement st ->
-    (make_indent indent) ^
     "return " ^ (stringify_opt_expression st.value)
   | BreakStatement ->
-    (make_indent indent) ^ "break"
+    "break"
 
-and stringify_opt_statement indent st =
+and stringify_opt_statement st =
   (match st with
-   | Some s -> stringify_statement ~indent:indent s
+   | Some s -> stringify_statement s
    | None -> "")
 
 and stringify_opt_expression e =
@@ -92,20 +83,36 @@ and stringify_opt_expression e =
   | Some e -> stringify_expression e
   | None -> ""
 
-and stringify_ast ?(indent=0) (v: ast) =
-  (make_indent indent) ^
+and stringify_function (func: ast_function) =
+  "Function " ^
+  (stringify_type func.return_type) ^
+  ": " ^ func.name ^ ":" ^
+  (String.concat ~sep:"," (List.map ~f:(fun s -> " " ^ s) (List.map ~f:stringify_var_pair func.arguments))) ^
+  "\n" ^
+  (indent_lines (stringify_statement_block func.body))
+
+and stringify_ast (v: ast) =
   (match v with
    | Variable var -> stringify_var_pair var
-   | Function func ->
-     "Function "
-     ^ (stringify_type func.return_type)
-     ^ ": " ^ func.name ^ ":"
-     ^ (String.concat "," (List.map (fun s -> " " ^ s) (List.map stringify_var_pair func.arguments))) ^ "\n"
-     ^ (stringify_statement_block func.body (indent + 1))
-   | Program p -> "Program\n" ^ (stringify_ast_list p.body (indent + 1))
-   | Statement stmt -> (stringify_statement ~indent:indent stmt)
+   | Class c ->
+     "Class " ^ c.name ^
+     (match c.super with
+      | Some s -> ": " ^ s
+      | None -> "") ^
+     " [" ^ (String.concat ~sep:" " c.interfaces) ^ "]" ^ "\n" ^
+     (indent_lines (stringify_list_helper stringify_var_pair c.properties)) ^ "\n" ^
+     (indent_lines (stringify_list_helper stringify_function c.methods))
+   | Function func -> (stringify_function func)
+   | Program p -> "Program\n" ^ (indent_lines (stringify_ast_list p.body))
+   | Statement stmt -> (stringify_statement stmt)
   )
 
-and make_indent indent =
-  String.make (2 * indent) ' '
+and indent_lines (lines: string) =
+  String.split_on_chars ~on:['\n'] lines
+  |> List.map ~f:(fun s ->
+      match s with
+      | "" -> ""
+      | _ -> "  " ^ s)
+  |> String.concat ~sep:"\n"
 ;;
+

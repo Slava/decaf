@@ -1,0 +1,13 @@
+Program
+  Class Animal []
+    <string name>
+    Function void: say:
+      (#Print "*make noise*")
+  Class Cat: Animal [Adorable]
+
+    Function void: say:
+      (#Print "meow")
+  Class Dog: Animal [Adorable Protector]
+
+    Function void: say:
+      (#Print "gaw")

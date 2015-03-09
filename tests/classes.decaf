@@ -1,0 +1,19 @@
+class Animal {
+  string name;
+  void say () {
+    Print("*make noise*");
+  }
+}
+
+class Cat extends Animal implements Adorable {
+  void say () {
+    Print("meow");
+  }
+}
+
+class Dog extends Animal implements Adorable, Protector {
+  void say () {
+    Print("gaw");
+  }
+}
+

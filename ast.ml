@@ -7,6 +7,7 @@ type ast_variable = (decaf_type * string);;
 type ast =
   | Variable of ast_variable
   | Function of ast_function
+  | Class of ast_class
   | Program of ast_program
   | Statement of ast_statement
 
@@ -16,6 +17,15 @@ and ast_function =
     arguments: ast_variable list;
     body: ast_statement_block;
     return_type: decaf_type;
+  }
+
+and ast_class =
+  {
+    name: string;
+    super: string option;
+    interfaces: string list;
+    methods: ast_function list;
+    properties: ast_variable list;
   }
 
 and ast_program =
