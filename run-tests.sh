@@ -33,3 +33,7 @@ for test_file in tests/parser/*.decaf; do
   RunTest "./parser_program.native" $test_file
 done
 
+for test_file in tests/lexer/*.decaf; do
+  RunTest "./lexer_program.native" $test_file
+done
+

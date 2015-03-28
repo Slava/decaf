@@ -32,8 +32,8 @@
 
   let stringify_token t =
       match t with
-      | INT i -> string_of_int i
-      | DOUBLE f -> string_of_float f
+      | INT i -> "int " ^ string_of_int i
+      | DOUBLE f -> "double " ^ string_of_float f
       | ID str -> "id " ^ str
       | STRING str -> "str " ^ str
       | TYPE str -> "type " ^ str
@@ -64,6 +64,15 @@
       | SEMICOLON -> "semicolon"
       | EQUALS -> "equals"
       | DOT -> "dot"
+      | UN_LOG_OP o -> "unary_logical_op(" ^ o  ^ ")"
+      | BIN_LOG_OP o -> "binary_logical_op(" ^ o  ^ ")"
+      | BIN_UN_ADD_OP o -> "binary_unary_add_op(" ^ o  ^ ")"
+      | BIN_MULT_OP o -> "binary_mult_op(" ^ o  ^ ")"
+      | BIN_CMP_OP o -> "binary_cmp_op(" ^ o  ^ ")"
+      | READLINE -> "ReadLine"
+      | READINTEGER -> "ReadInteger"
+      | PRINT -> "Print"
+      | NEWARRAY -> "NewArray"
 }
 
 let letter = ['a'-'z' 'A'-'Z']

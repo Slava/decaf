@@ -15,7 +15,7 @@ lexer_program.native: sources
 sources: $(shell find . -maxdepth 1 -name "*.ml" -o -name "*.mll" -o -name "*.mly")
 
 test: tests
-tests: parser_program
+tests: parser_program lexer_program
 	./run-tests.sh
 
 clean:

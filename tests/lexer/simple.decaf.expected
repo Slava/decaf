@@ -1,0 +1,53 @@
+type int
+type double
+type string
+id char
+type bool
+null
+class
+interface
+this
+extends
+implements
+for
+while
+if
+else
+return
+break
+new
+comma
+paren_open
+paren_close
+brace_open
+brace_close
+array_decl
+semicolon
+equals
+dot
+binary_logical_op(&&)
+binary_logical_op(||)
+unary_logical_op(!)
+binary_unary_add_op(+)
+binary_unary_add_op(-)
+binary_mult_op(*)
+binary_mult_op(/)
+binary_mult_op(%)
+binary_cmp_op(>)
+binary_cmp_op(<)
+binary_cmp_op(>=)
+binary_cmp_op(<=)
+binary_cmp_op(==)
+id identifier
+id another
+id one
+str some string
+int 123
+int 32495392
+int 123
+int 12323
+double 222.45
+double 0.1
+double 1.
+double 0.324
+eof

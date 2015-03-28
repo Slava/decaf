@@ -1,0 +1,13 @@
+/* keywords and operators */
+int double string char bool null class interface this extends implements for while if else return break new , () {}[];=.&&||!+-*/% >< >= <= ==
+
+/* ids */
+identifier another one
+
+/* some comments go here, should be ignored */
+
+/* literals */
+"some string"
+123 32495392 123 012323
+222.45 0.1  1. 0.324
+
