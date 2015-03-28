@@ -8,16 +8,18 @@ Tgreen () { printf '\e[0;32m'"$*"'\e[m'; }
 test_out=/tmp/test_out
 diff="git diff"
 
-for test_file in tests/*.decaf; do
+RunTest () {
+  test_runner=$1
+  test=$2
   Normal "> Running a test for "
-  Tgreen $test_file "\n"
-  ./parser_program.native $test_file > $test_out
+  Tgreen $test "\n"
+  $test_runner $test > $test_out
   if [ $? -ne 0 ]; then
     Tred "Comp Error\n\n"
     continue
   fi
 
-  $diff ${test_file}.expected $test_out
+  $diff ${test}.expected $test_out
   if [ $? -eq 0 ]; then
     Tgreen "OK\n"
   else
@@ -25,5 +27,9 @@ for test_file in tests/*.decaf; do
   fi
 
   echo
+}
+
+for test_file in tests/parser/*.decaf; do
+  RunTest "./parser_program.native" $test_file
 done
 
