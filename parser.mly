@@ -66,7 +66,7 @@ exception SyntaxError of string
 program:
   | program_
     {
-      Program { body = $1; }
+      Program { program_body = $1; }
     }
   ;
 
@@ -89,24 +89,24 @@ variable_decl:
 
 function_decl:
   /* Type name (Type a, Type b) stmt_block */
-  | return_type = type_ name = ID PAREN_OPEN arguments = formals
-    PAREN_CLOSE body = stmt_block
+  | func_return_type = type_ func_name = ID PAREN_OPEN func_arguments = formals
+    PAREN_CLOSE func_body = stmt_block
     {
-      { name; arguments; return_type; body; }
+      { func_name; func_arguments; func_return_type; func_body; }
     }
   ;
 
 class_decl:
-  | CLASS; name = ID;
+  | CLASS; class_name = ID;
     ext = option(class_decl_extends); implmnts = class_decl_implements;
     BRACE_OPEN; fields = class_fields; BRACE_CLOSE;
     {
       {
-        name;
+        class_name;
         super = ext;
         interfaces = implmnts;
         methods = (fst fields);
-        properties = (snd fields);
+        class_properties = (snd fields);
       }
     }
   ;
@@ -129,19 +129,19 @@ class_fields:
   ;
 
 interface_decl:
-  | INTERFACE; name = ID; BRACE_OPEN; props = list(prototype); BRACE_CLOSE;
+  | INTERFACE; interface_name = ID; BRACE_OPEN; props = list(prototype); BRACE_CLOSE;
     {
       {
-        name;
-        properties = props;
+        interface_name;
+        interface_properties = props;
       }
     }
   ;
 
 prototype:
-  | return_type = type_; name = ID; PAREN_OPEN; arguments = formals; PAREN_CLOSE; SEMICOLON;
+  | proto_return_type = type_; proto_name = ID; PAREN_OPEN; proto_arguments = formals; PAREN_CLOSE; SEMICOLON;
     {
-      { return_type; name; arguments; }
+      { proto_return_type; proto_name; proto_arguments; }
     }
   ;
 
@@ -188,9 +188,9 @@ stmt:
   | if_stmt
       { Some (IfStatement $1) }
   | while_stmt
-      { Some (WhileStatement $1) }
+      { Some (LoopStatement $1) }
   | for_stmt
-      { Some (ForStatement $1) }
+      { Some (LoopStatement $1) }
   | return_stmt
       { Some (ReturnStatement $1) }
   | break_stmt
@@ -219,20 +219,29 @@ while_stmt:
   | WHILE; PAREN_OPEN; cond = expr; PAREN_CLOSE; body = stmt;
     {
       {
-        condition = cond;
-        body = body;
+        loop_type = While;
+        loop_initialization = None;
+        loop_condition = cond;
+        loop_afterthought = None;
+        loop_body = body;
       }
     }
   ;
 
 for_stmt:
   | FOR; PAREN_OPEN;
-      initialization = option(expr); SEMICOLON;
-      condition = expr; SEMICOLON;
-      afterthought = option(expr); PAREN_CLOSE;
-    body = stmt;
+      loop_initialization = option(expr); SEMICOLON;
+      loop_condition = expr; SEMICOLON;
+      loop_afterthought = option(expr); PAREN_CLOSE;
+    loop_body = stmt;
     {
-      { initialization; condition; afterthought; body; }
+      {
+        loop_type = For;
+        loop_initialization;
+        loop_condition;
+        loop_afterthought;
+        loop_body;
+      }
     }
   ;
 
@@ -254,7 +263,7 @@ print_stmt:
         | [] -> raise (SyntaxError ("Print must have at least one argument."))
         | el -> Expression(CallExpression {
                   callee = Symbol("Print");
-                  arguments = el;
+                  call_arguments = el;
                 })
       }
   ;
@@ -297,7 +306,7 @@ expr_arithm:
     {
       ArithmeticExpression {
         loperand = l;
-        roperand = r;
+        roperand = Some r;
         operator = op;
       }
     }
@@ -312,8 +321,9 @@ expr_un_arithm:
 %inline expr_un_arithm_gen(OP):
   | op = OP; e = expr;
     {
-      UnArithmeticExpression {
-        operand = e;
+      ArithmeticExpression {
+        loperand = e;
+        roperand = None;
         operator = op;
       }
     }
@@ -333,6 +343,7 @@ alloc_expr:
     {
       AllocExpression {
         type_ = t;
+        size = None;
       }
     }
   ;
@@ -344,28 +355,28 @@ call:
     {
       CallExpression {
         callee = lval;
-        arguments = args;
+        call_arguments = args;
       }
     }
   | READINTEGER PAREN_OPEN PAREN_CLOSE
       {
         CallExpression {
           callee = Symbol("ReadInteger");
-          arguments = [];
+          call_arguments = [];
         }
       }
   | READLINE PAREN_OPEN PAREN_CLOSE
       {
         CallExpression {
           callee = Symbol("ReadLine");
-          arguments = [];
+          call_arguments = [];
         }
       }
   | NEWARRAY PAREN_OPEN size = expr; COMMA; t = type_; PAREN_CLOSE
       {
-        ArrayAllocExpression {
+        AllocExpression {
           type_ = t;
-          size = size;
+          size = Some size;
         }
       }
   ;

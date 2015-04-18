@@ -22,8 +22,10 @@ let rec stringify_expression e =
   | ArrayExpression e -> "<" ^ (stringify_expression e.array) ^ ">"
                          ^ "[" ^ (stringify_expression e.index) ^ "]"
   | AssignmentExpression e -> "(= " ^ (stringify_expression e.lvalue) ^ " " ^ (stringify_expression e.rvalue) ^ ")"
-  | ArithmeticExpression e -> "(" ^ e.operator ^ " " ^ (stringify_expression e.loperand) ^ " " ^ (stringify_expression e.roperand) ^ ")"
-  | UnArithmeticExpression e -> "(" ^ e.operator ^ " " ^ (stringify_expression e.operand) ^ ")"
+  | ArithmeticExpression e -> "(" ^ e.operator ^ " " ^ (stringify_expression e.loperand) ^
+                              (match e.roperand with
+                               | None -> ")"
+                               | Some operand -> " " ^ (stringify_expression operand) ^ ")")
   | This -> "this"
   | CallExpression e ->
     "(" ^
@@ -31,10 +33,12 @@ let rec stringify_expression e =
     (String.concat ~sep:""
        (List.map
           ~f:(fun s -> " " ^ (stringify_expression s))
-          e.arguments)) ^
+          e.call_arguments)) ^
     ")"
-  | ArrayAllocExpression e -> "new " ^ (stringify_type e.type_) ^ "[" ^ (stringify_expression e.size) ^ "]"
-  | AllocExpression e -> "new " ^ (stringify_type e.type_)
+  | AllocExpression e -> "new " ^ (stringify_type e.type_) ^ (
+      match e.size with
+      | None -> ""
+      | Some size -> "[" ^ (stringify_expression size) ^ "]")
 
 let rec stringify_ast_list (v: ast list) =
   String.concat ~sep:"\n"
@@ -60,14 +64,14 @@ and stringify_statement (v: ast_statement) =
        "\nelse\n" ^
        indent_lines (stringify_statement alt)
      | None -> "")
-  | WhileStatement st ->
-    "while " ^ (stringify_expression st.condition) ^ "\n" ^
-    indent_lines (stringify_opt_statement st.body)
-  | ForStatement st ->
-    "for |" ^ (stringify_opt_expression st.initialization) ^
-    "|" ^ (stringify_expression st.condition) ^
-    "|" ^ (stringify_opt_expression st.afterthought) ^ "|\n" ^
-    indent_lines (stringify_opt_statement st.body)
+  | LoopStatement st -> (
+      match st.loop_type with
+      | For -> ("for |" ^ (stringify_opt_expression st.loop_initialization) ^
+                "|" ^ (stringify_expression st.loop_condition) ^
+                "|" ^ (stringify_opt_expression st.loop_afterthought) ^ "|\n" ^
+                indent_lines (stringify_opt_statement st.loop_body))
+      | While -> ("while " ^ (stringify_expression st.loop_condition) ^ "\n" ^
+                  indent_lines (stringify_opt_statement st.loop_body)))
   | ReturnStatement st ->
     "return " ^ (stringify_opt_expression st.value)
   | BreakStatement ->
@@ -90,33 +94,33 @@ and stringify_formals fs =
 
 and stringify_function (func: ast_function) =
   "Function " ^
-  stringify_type func.return_type ^
-  ": " ^ func.name ^ ":" ^
-  stringify_formals func.arguments ^
+  stringify_type func.func_return_type ^
+  ": " ^ func.func_name ^ ":" ^
+  stringify_formals func.func_arguments ^
   "\n" ^
-  indent_lines (stringify_statement_block func.body)
+  indent_lines (stringify_statement_block func.func_body)
 
 and stringify_prototype (p: ast_prototype) =
-  stringify_type p.return_type ^
-  ": " ^ p.name ^ ":" ^
-  stringify_formals p.arguments
+  stringify_type p.proto_return_type ^
+  ": " ^ p.proto_name ^ ":" ^
+  stringify_formals p.proto_arguments
 
 and stringify_ast (v: ast) =
   (match v with
    | Variable var -> stringify_var_pair var
    | Class c ->
-     "Class " ^ c.name ^
+     "Class " ^ c.class_name ^
      (match c.super with
       | Some s -> ": " ^ s
       | None -> "") ^
      " [" ^ (String.concat ~sep:" " c.interfaces) ^ "]" ^ "\n" ^
-     indent_lines (stringify_list_helper stringify_var_pair c.properties) ^ "\n" ^
+     indent_lines (stringify_list_helper stringify_var_pair c.class_properties) ^ "\n" ^
      indent_lines (stringify_list_helper stringify_function c.methods)
    | Interface i ->
-     "Interface " ^ i.name ^ "\n" ^
-     indent_lines (stringify_list_helper stringify_prototype i.properties)
+     "Interface " ^ i.interface_name ^ "\n" ^
+     indent_lines (stringify_list_helper stringify_prototype i.interface_properties)
    | Function func -> (stringify_function func)
-   | Program p -> "Program\n" ^ indent_lines (stringify_ast_list p.body)
+   | Program p -> "Program\n" ^ indent_lines (stringify_ast_list p.program_body)
    | Statement stmt -> (stringify_statement stmt)
   )
 

@@ -6,6 +6,7 @@ Tred () { printf '\e[0;31m'"$*"'\e[m'; }
 Tgreen () { printf '\e[0;32m'"$*"'\e[m'; }
 
 test_out=/tmp/test_out
+test_err=/tmp/test_err
 diff="git diff"
 
 RunTest () {
@@ -13,9 +14,24 @@ RunTest () {
   test=$2
   Normal "> Running a test for "
   Tgreen $test "\n"
-  $test_runner $test > $test_out
-  if [ $? -ne 0 ]; then
-    Tred "Comp Error\n\n"
+  $test_runner $test > $test_out 2> $test_err
+  exit_code=$?
+  if [ $exit_code -ne 0 ]; then
+    if [ -f ${test}.failure ]; then
+      $diff ${test}.failure $test_err
+      if [ $? -eq 0 ]; then
+        Tgreen "OK\n"
+      else
+        Tred "FAIL\n"
+      fi
+      continue
+    fi
+
+    Tred "Program Failed\n\n"
+    echo "Exited with exit code:" $exit_code
+    echo "STDERR: >>>"
+    cat $test_err
+    echo "STDERR: <<<"
     continue
   fi
 
@@ -35,5 +51,9 @@ done
 
 for test_file in tests/lexer/*.decaf; do
   RunTest "./lexer_program.native" $test_file
+done
+
+for test_file in tests/analysis/*.decaf; do
+  RunTest "./analysis_program.native" $test_file
 done
 

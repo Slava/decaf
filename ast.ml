@@ -14,45 +14,44 @@ type ast =
 
 and ast_function =
   {
-    name: string;
-    arguments: ast_variable list;
-    body: ast_statement_block;
-    return_type: decaf_type;
+    func_name: string;
+    func_arguments: ast_variable list;
+    func_body: ast_statement_block;
+    func_return_type: decaf_type;
   }
 
 and ast_class =
   {
-    name: string;
+    class_name: string;
     super: string option;
     interfaces: string list;
     methods: ast_function list;
-    properties: ast_variable list;
+    class_properties: ast_variable list;
   }
 
 and ast_interface =
   {
-    name: string;
-    properties: ast_prototype list;
+    interface_name: string;
+    interface_properties: ast_prototype list;
   }
 
 and ast_prototype =
   {
-    return_type: decaf_type;
-    name: string;
-    arguments: ast_variable list;
+    proto_return_type: decaf_type;
+    proto_name: string;
+    proto_arguments: ast_variable list;
   }
 
 and ast_program =
   {
-    body: ast list;
+    program_body: ast list;
   }
 
 and ast_statement =
   | Expression of ast_expression
   | StatementBlock of ast_statement_block
   | IfStatement of ast_if_statement
-  | WhileStatement of ast_while_statement
-  | ForStatement of ast_for_statement
+  | LoopStatement of ast_loop_statement
   | ReturnStatement of ast_return_statement
   | BreakStatement
 
@@ -69,19 +68,18 @@ and ast_if_statement =
     alternative: ast_statement option;
   }
 
-and ast_while_statement =
+and ast_loop_statement =
   {
-    condition: ast_expression;
-    body: ast_statement option;
+    loop_type: ast_loop_type;
+    loop_initialization: ast_expression option;
+    loop_condition: ast_expression;
+    loop_afterthought: ast_expression option;
+    loop_body: ast_statement option;
   }
 
-and ast_for_statement =
-  {
-    initialization: ast_expression option;
-    condition: ast_expression;
-    afterthought: ast_expression option;
-    body: ast_statement option;
-  }
+and ast_loop_type =
+  | For
+  | While
 
 and ast_return_statement =
   {
@@ -95,10 +93,8 @@ and ast_expression =
   | ArrayExpression of ast_array_expression
   | AssignmentExpression of ast_assignment_expression
   | ArithmeticExpression of ast_arithmetic_expression
-  | UnArithmeticExpression of ast_unary_arithmetic_expression
   | This
   | CallExpression of ast_call_expression
-  | ArrayAllocExpression of ast_array_alloc_expression
   | AllocExpression of ast_alloc_expression
 
 and ast_member_expression =
@@ -122,30 +118,19 @@ and ast_assignment_expression =
 and ast_arithmetic_expression =
   {
     loperand: ast_expression;
-    roperand: ast_expression;
-    operator: string;
-  }
-
-and ast_unary_arithmetic_expression =
-  {
-    operand: ast_expression;
+    roperand: ast_expression option;
     operator: string;
   }
 
 and ast_call_expression =
   {
     callee: ast_expression;
-    arguments: ast_expression list;
-  }
-
-and ast_array_alloc_expression =
-  {
-    type_: decaf_type;
-    size: ast_expression;
+    call_arguments: ast_expression list;
   }
 
 and ast_alloc_expression =
   {
     type_: decaf_type;
+    size: ast_expression option;
   }
 

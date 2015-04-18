@@ -1,6 +1,10 @@
 FLAGS=-use-menhir -tag thread -use-ocamlfind -quiet -pkg core -menhir 'menhir --explain'
 
-all: parser_program lexer_program
+all: parser_program lexer_program analysis_program
+
+analysis_program: analysis_program.native
+analysis_program.native: sources
+	ocamlbuild $(FLAGS) analysis_program.native
 
 parser_program: parser_program.native
 parser_program.byte: sources
@@ -15,7 +19,7 @@ lexer_program.native: sources
 sources: $(shell find . -maxdepth 1 -name "*.ml" -o -name "*.mll" -o -name "*.mly")
 
 test: tests
-tests: parser_program lexer_program
+tests: all
 	./run-tests.sh
 
 clean:
