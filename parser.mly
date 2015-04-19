@@ -2,8 +2,10 @@
 open Ast
 open Constants
 open Types
+module L = Location
 
 exception SyntaxError of string
+
 %}
 
 %token <int> INT
@@ -61,25 +63,35 @@ exception SyntaxError of string
 %start <Ast.ast> program
 %%
 
+%inline loc(X):
+  | x = X { L.mkloc x (L.mk $startpos $endpos) }
+
+%inline loc_opt(X):
+  | x = X
+    {
+      match x with
+      | None -> None
+      | Some v -> Some (L.mkloc v (L.mk $startpos $endpos))
+    }
 
 /* list of declarations */
 program:
-  | program_
+  | p = loc(program_)
     {
-      Program { program_body = $1; }
+      Program (L.mkloc { program_body = p.L.item; } p.L.loc)
     }
   ;
 
 program_:
   | EOF { [] }
-  | decl program_ { $1 :: $2 }
+  | d = loc(decl); rest = program_ { d :: rest }
   ;
 
 decl:
-  | variable_decl { Variable $1 }
-  | function_decl { Function $1 }
-  | class_decl { Class $1 }
-  | interface_decl { Interface $1 }
+  | l = loc(variable_decl) { Variable l }
+  | l = loc(function_decl) { Function l }
+  | l = loc(class_decl) { Class l }
+  | l = loc(interface_decl) { Interface l }
   ;
 
 variable_decl:
@@ -89,16 +101,19 @@ variable_decl:
 
 function_decl:
   /* Type name (Type a, Type b) stmt_block */
-  | func_return_type = type_ func_name = ID PAREN_OPEN func_arguments = formals
-    PAREN_CLOSE func_body = stmt_block
+  | func_return_type = loc(type_);
+    func_name = loc(ID);
+    PAREN_OPEN; func_arguments = formals; PAREN_CLOSE;
+    func_body = loc(stmt_block)
     {
       { func_name; func_arguments; func_return_type; func_body; }
     }
   ;
 
 class_decl:
-  | CLASS; class_name = ID;
-    ext = option(class_decl_extends); implmnts = class_decl_implements;
+  | CLASS; class_name = loc(ID);
+    ext = option(loc(class_decl_extends));
+    implmnts = class_decl_implements;
     BRACE_OPEN; fields = class_fields; BRACE_CLOSE;
     {
       {
@@ -117,19 +132,21 @@ class_decl_extends:
 
 class_decl_implements:
   | /* empty */ { [] }
-  | IMPLEMENTS l = separated_list(COMMA, ID) { l }
+  | IMPLEMENTS l = separated_list(COMMA, loc(ID)) { l }
   ;
 
 class_fields:
   | /* empty */ { ([], []) }
-  | variable_decl class_fields
-    { ((fst $2), $1::(snd $2)) }
-  | function_decl class_fields
-    { ($1::(fst $2), (snd $2)) }
+  | vd = loc(variable_decl); rest = class_fields
+    { ((fst rest), vd::(snd rest)) }
+  | vd = loc(function_decl); rest = class_fields
+    { (vd::(fst rest), (snd rest)) }
   ;
 
 interface_decl:
-  | INTERFACE; interface_name = ID; BRACE_OPEN; props = list(prototype); BRACE_CLOSE;
+  | INTERFACE;
+    interface_name = loc(ID);
+    BRACE_OPEN; props = list(loc(prototype)); BRACE_CLOSE;
     {
       {
         interface_name;
@@ -139,14 +156,16 @@ interface_decl:
   ;
 
 prototype:
-  | proto_return_type = type_; proto_name = ID; PAREN_OPEN; proto_arguments = formals; PAREN_CLOSE; SEMICOLON;
+  | proto_return_type = loc(type_);
+    proto_name = loc(ID);
+    PAREN_OPEN; proto_arguments = formals; PAREN_CLOSE; SEMICOLON;
     {
       { proto_return_type; proto_name; proto_arguments; }
     }
   ;
 
 formals:
-  | variables = separated_list(COMMA, variable) { variables }
+  | variables = separated_list(COMMA, loc(variable)) { variables }
   ;
 
 stmt_block:
@@ -156,14 +175,14 @@ stmt_block:
 
 stmt_block_:
   | /* empty */ { { declarations = []; statements = []; } }
-  | var = variable; SEMICOLON; rest = stmt_block_;
+  | var = loc(variable); SEMICOLON; rest = stmt_block_;
     {
       {
         declarations = var::rest.declarations;
         statements = rest.statements;
       }
     }
-  | stmt = stmt; statements = list(stmt)
+  | stmt = loc_opt(stmt); statements = list(loc_opt(stmt))
     {
       (* deoptionalize statements *)
       let stmts = (Core.Std.List.filter_map ~f:Core.Std.Fn.id (stmt::statements)) in
@@ -175,30 +194,31 @@ stmt_block_:
   ;
 
 stmt:
-  | opt_expr = option(expr) SEMICOLON
+  | opt_expr = option(loc(expr)) SEMICOLON
       {
         match opt_expr with
         | None -> None
-        | Some expr -> Some (Expression expr)
+        | Some l -> Some (Expression l)
       }
-  | p = print_stmt
-      { Some p; }
-  | stmt_block
-      { Some (StatementBlock $1) }
-  | if_stmt
-      { Some (IfStatement $1) }
-  | while_stmt
-      { Some (LoopStatement $1) }
-  | for_stmt
-      { Some (LoopStatement $1) }
-  | return_stmt
-      { Some (ReturnStatement $1) }
-  | break_stmt
-      { Some BreakStatement }
+  | l = loc(print_stmt)
+      { Some (Expression l); }
+  | l = loc(stmt_block)
+      { Some (StatementBlock l) }
+  | l = loc(if_stmt)
+      { Some (IfStatement l) }
+  | l = loc(while_stmt)
+      { Some (LoopStatement l) }
+  | l = loc(for_stmt)
+      { Some (LoopStatement l) }
+  | l = loc(return_stmt)
+      { Some (ReturnStatement l) }
+  | l = loc(break_stmt)
+      { Some (BreakStatement l) }
   ;
 
 if_stmt:
-  | IF PAREN_OPEN cond = expr; PAREN_CLOSE cons = stmt; altern = opt_else_tail;
+  | IF; PAREN_OPEN; cond = loc(expr); PAREN_CLOSE;
+    cons = loc_opt(stmt); altern = opt_else_tail;
     {
       {
         condition = cond;
@@ -211,12 +231,12 @@ if_stmt:
 opt_else_tail:
   | /* empty */ %prec NOELSE
     { None }
-  | ELSE stmt;
-    { $2 }
+  | ELSE; st = loc_opt(stmt);
+    { st }
   ;
 
 while_stmt:
-  | WHILE; PAREN_OPEN; cond = expr; PAREN_CLOSE; body = stmt;
+  | WHILE; PAREN_OPEN; cond = loc(expr); PAREN_CLOSE; body = loc_opt(stmt);
     {
       {
         loop_type = While;
@@ -230,10 +250,10 @@ while_stmt:
 
 for_stmt:
   | FOR; PAREN_OPEN;
-      loop_initialization = option(expr); SEMICOLON;
-      loop_condition = expr; SEMICOLON;
-      loop_afterthought = option(expr); PAREN_CLOSE;
-    loop_body = stmt;
+    loop_initialization = option(loc(expr)); SEMICOLON;
+    loop_condition = loc(expr); SEMICOLON;
+    loop_afterthought = option(loc(expr)); PAREN_CLOSE;
+    loop_body = loc_opt(stmt);
     {
       {
         loop_type = For;
@@ -246,7 +266,7 @@ for_stmt:
   ;
 
 return_stmt:
-  | RETURN; opt_expr = option(expr); SEMICOLON;
+  | RETURN; opt_expr = option(loc(expr)); SEMICOLON;
     {
       { value = opt_expr; }
     }
@@ -257,25 +277,29 @@ break_stmt:
     { }
   ;
 print_stmt:
-  | PRINT; PAREN_OPEN; el = separated_list(COMMA, expr); PAREN_CLOSE; SEMICOLON
+  | p = loc(print); PAREN_OPEN; el = separated_list(COMMA, loc(expr)); PAREN_CLOSE; SEMICOLON
       {
         match el with
         | [] -> raise (SyntaxError ("Print must have at least one argument."))
-        | el -> Expression(CallExpression {
-                  callee = Symbol("Print");
-                  call_arguments = el;
-                })
+        | el -> CallExpression {
+            callee = p;
+            call_arguments = el;
+          }
       }
+  ;
+
+print:
+  | PRINT { Symbol("Print") }
   ;
 
 expr:
   /* implicitly make '=' operator right-associative */
-  | lvalue EQUALS expr
+  | lv = loc(lvalue); EQUALS; e = loc(expr)
     {
       AssignmentExpression
         {
-          lvalue = $1;
-          rvalue = $3;
+          lvalue = lv;
+          rvalue = e;
         }
     }
   | expr_simple { $1 }
@@ -302,7 +326,7 @@ expr_arithm:
   ;
 
 %inline expr_arithm_gen(OP):
-  | l = expr; op = OP; r = expr;
+  | l = loc(expr); op = loc(OP); r = loc(expr);
     {
       ArithmeticExpression {
         loperand = l;
@@ -319,7 +343,7 @@ expr_un_arithm:
   ;
 
 %inline expr_un_arithm_gen(OP):
-  | op = OP; e = expr;
+  | op = loc(OP); e = loc(expr);
     {
       ArithmeticExpression {
         loperand = e;
@@ -331,15 +355,21 @@ expr_un_arithm:
 
 lvalue:
   | ID { Symbol($1) }
-  | expr_simple DOT ID { MemberExpression { host = $1; member = Symbol($3); } }
-  | expr_simple BRACKET_OPEN expr BRACKET_CLOSE
+  | es = loc(expr_simple); DOT; m = loc(ID)
     {
-      ArrayExpression { array = $1; index = $3; }
+      MemberExpression {
+        host = es;
+        member = L.mkloc (Symbol m.L.item) m.L.loc;
+      }
+    }
+    | es = loc(expr_simple); BRACKET_OPEN; e = loc(expr); BRACKET_CLOSE
+    {
+      ArrayExpression { array = es; index = e; }
     }
   ;
 
 alloc_expr:
-  | NEW t = type_
+  | NEW t = loc(type_)
     {
       AllocExpression {
         type_ = t;
@@ -351,28 +381,28 @@ alloc_expr:
 call:
   /* this doesn't follow decaf's spec precisely */
   /* according to the spec, an expr like a[1]() is not a valid call */
-  | lval = lvalue PAREN_OPEN args = actuals PAREN_CLOSE
+  | lval = loc(lvalue) PAREN_OPEN args = actuals PAREN_CLOSE
     {
       CallExpression {
         callee = lval;
         call_arguments = args;
       }
     }
-  | READINTEGER PAREN_OPEN PAREN_CLOSE
+  | l = loc(READINTEGER) PAREN_OPEN PAREN_CLOSE
       {
         CallExpression {
-          callee = Symbol("ReadInteger");
+          callee = L.mkloc (Symbol "ReadInteger") l.L.loc;
           call_arguments = [];
         }
       }
-  | READLINE PAREN_OPEN PAREN_CLOSE
+  | l = loc(READLINE) PAREN_OPEN PAREN_CLOSE
       {
         CallExpression {
-          callee = Symbol("ReadLine");
+          callee = L.mkloc (Symbol "ReadLine") l.L.loc;
           call_arguments = [];
         }
       }
-  | NEWARRAY PAREN_OPEN size = expr; COMMA; t = type_; PAREN_CLOSE
+  | NEWARRAY PAREN_OPEN size = loc(expr); COMMA; t = loc(type_); PAREN_CLOSE
       {
         AllocExpression {
           type_ = t;
@@ -382,7 +412,7 @@ call:
   ;
 
 actuals:
-  | l = separated_list(COMMA, expr) { l }
+  | l = separated_list(COMMA, loc(expr)) { l }
   ;
 
 constant:
